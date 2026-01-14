@@ -2,14 +2,20 @@
   "expo": {
     "name": "EmlmNew",
     "slug": "EmlmNew",
-    "version": "1.0.0",
+    "version": "10.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "emlmnew",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "image": "latest",
+      "buildNumber": 10,
+      "supportsTablet": true,
+      "bundleIdentifier": "com.org.emlm",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -30,7 +36,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -43,6 +49,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "668b6089-50c2-455d-9a4f-ddaf956e4111"
+      }
     }
   }
 }
