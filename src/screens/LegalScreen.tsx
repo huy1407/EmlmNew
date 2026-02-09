@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet, Text } from "react-native";
 import DisclaimerBanner from "../components/DisclaimerBanner";
 import { theme } from "../styles/theme";
 
@@ -15,7 +15,7 @@ export default function LegalScreen({ title, content }: LegalScreenProps) {
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.body}>{content}</Text>
       <Text style={styles.contact}>
-        Liên hệ: [Placeholder - Developer contact]
+        Mọi phản hồi vui lòng gửi qua trang hỗ trợ của ứng dụng.
       </Text>
     </ScrollView>
   );
