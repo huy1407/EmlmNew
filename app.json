@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "EmlmNew",
-    "slug": "EmlmNew",
+    "name": "eMLM",
+    "slug": "eMLM",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "emlmnew",
+    "scheme": "emlm",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -52,7 +52,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "668b6089-50c2-455d-9a4f-ddaf956e4111"
+        "projectId": "07be9449-8119-456a-877c-40cbb327e764"
       }
     }
   }
