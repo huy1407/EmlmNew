@@ -9,6 +9,7 @@ interface SettingsScreenProps {
 }
 
 const MENU_ITEMS: { key: Route["name"]; title: string }[] = [
+  { key: "risk-assessment", title: "MLM Risk Self-Assessment" },
   { key: "privacy", title: "Privacy Policy" },
   { key: "terms", title: "Terms of Use" },
   { key: "guidelines", title: "Community Guidelines" },

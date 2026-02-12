@@ -27,6 +27,7 @@ import SearchScreen from "./src/screens/SearchScreen";
 import BookmarksScreen from "./src/screens/BookmarksScreen";
 import SettingsScreen from "./src/screens/SettingsScreen";
 import LegalScreen from "./src/screens/LegalScreen";
+import RiskAssessmentScreen from "./src/screens/RiskAssessmentScreen";
 
 import {
   KNOWLEDGE_ARTICLES,
@@ -257,6 +258,8 @@ export default function App() {
         );
       case "settings":
         return <SettingsScreen onNavigate={(r) => go(r.name, r.params)} />;
+      case "risk-assessment":
+        return <RiskAssessmentScreen />;
       case "privacy":
         return (
           <LegalScreen title="Privacy Policy" content={PRIVACY_CONTENT} />

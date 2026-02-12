@@ -86,6 +86,7 @@ export type RouteName =
   | "search"
   | "bookmarks"
   | "settings"
+  | "risk-assessment"
   | "privacy"
   | "terms"
   | "guidelines"
