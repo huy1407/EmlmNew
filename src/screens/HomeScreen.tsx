@@ -1,21 +1,20 @@
 import React from "react";
 import {
-  View,
-  Text,
-  TextInput,
   Pressable,
   ScrollView,
   StyleSheet,
+  Text,
+  View
 } from "react-native";
-import DisclaimerBanner from "../components/DisclaimerBanner";
-import CardButton from "../components/CardButton";
 import BookmarksPreview from "../components/BookmarksPreview";
-import RecentlyViewedPreview from "../components/RecentlyViewedPreview";
-import LearningPathCard from "../components/LearningPathCard";
+import CardButton from "../components/CardButton";
 import CompanyCompareCard from "../components/CompanyCompareCard";
-import { useLearningProgress } from "../hooks/useLearningProgress";
+import DisclaimerBanner from "../components/DisclaimerBanner";
+import LearningPathCard from "../components/LearningPathCard";
+import RecentlyViewedPreview from "../components/RecentlyViewedPreview";
 import { LEARNING_PATH } from "../data/learningPath";
-import type { Route, Bookmark, RecentlyViewedItem } from "../types";
+import { useLearningProgress } from "../hooks/useLearningProgress";
+import type { Bookmark, RecentlyViewedItem, Route } from "../types";
 
 interface HomeScreenProps {
   onNavigate: (route: Route) => void;
@@ -23,14 +22,6 @@ interface HomeScreenProps {
   recentlyViewed?: RecentlyViewedItem[];
 }
 
-const FEATURES = [
-  { key: "knowledge-list", title: "Kiến thức MLM" },
-  { key: "regulation-list", title: "Pháp luật (tham khảo)" },
-  { key: "company-list", title: "Doanh nghiệp" },
-  { key: "qa-list", title: "Hỏi & đáp" },
-  { key: "alert-list", title: "Cảnh báo" },
-  { key: "news-list", title: "Tin tức" },
-];
 
 const FEATURES = [
   { key: "knowledge-list", title: "Kiến thức MLM" },
