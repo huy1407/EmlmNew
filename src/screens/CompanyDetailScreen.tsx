@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ interface CompanyDetailScreenProps {
   onVoteTransparent: (id: string) => void;
   onVoteResearch: (id: string) => void;
   onBack: () => void;
+  onViewDetail?: () => void;
 }
 
 export default function CompanyDetailScreen({
@@ -25,7 +26,12 @@ export default function CompanyDetailScreen({
   getSignals,
   onVoteTransparent,
   onVoteResearch,
+  onViewDetail,
 }: CompanyDetailScreenProps) {
+  useEffect(() => {
+    onViewDetail?.();
+  }, [company?.id, onViewDetail]);
+
   if (!company) return null;
 
   const signals = getSignals(company);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, ScrollView, Pressable, Linking, StyleSheet } from "react-native";
 import DisclaimerBanner from "../components/DisclaimerBanner";
 import { formatDate, shareWithDisclaimer } from "../utils";
@@ -8,9 +8,14 @@ import { theme } from "../styles/theme";
 interface NewsDetailScreenProps {
   item: NewsItem | undefined;
   onBack: () => void;
+  onViewDetail?: () => void;
 }
 
-export default function NewsDetailScreen({ item }: NewsDetailScreenProps) {
+export default function NewsDetailScreen({ item, onViewDetail }: NewsDetailScreenProps) {
+  useEffect(() => {
+    onViewDetail?.();
+  }, [item?.id, onViewDetail]);
+
   if (!item) return null;
 
   const handleOpenSource = () => {

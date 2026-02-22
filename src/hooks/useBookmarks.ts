@@ -1,21 +1,42 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Bookmark, BookmarkType } from "../types";
 
-// In-memory fallback. TODO: Replace with AsyncStorage when available
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-const STORAGE_KEY = "emlm_bookmarks";
+const STORAGE_KEY = "@emlm/bookmarks_v1";
 
 function getStoredBookmarks(): Bookmark[] {
-  // TODO: AsyncStorage.getItem(STORAGE_KEY).then(JSON.parse)
   return [];
 }
 
-function setStoredBookmarks(bookmarks: Bookmark[]) {
-  // TODO: AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(bookmarks))
+async function getStoredBookmarksAsync(): Promise<Bookmark[]> {
+  try {
+    const stored = await AsyncStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+async function setStoredBookmarksAsync(bookmarks: Bookmark[]) {
+  try {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(bookmarks));
+  } catch {
+    // ignore
+  }
 }
 
 export function useBookmarks() {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>(getStoredBookmarks);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Load from AsyncStorage on mount
+  useEffect(() => {
+    (async () => {
+      const stored = await getStoredBookmarksAsync();
+      setBookmarks(stored);
+      setIsHydrated(true);
+    })();
+  }, []);
 
   const addBookmark = useCallback(
     (type: BookmarkType, id: string, title: string) => {
@@ -23,7 +44,7 @@ export function useBookmarks() {
       setBookmarks((prev) => {
         if (prev.some((b) => b.key === key)) return prev;
         const next = [...prev, { key, type, id, title }];
-        setStoredBookmarks(next);
+        setStoredBookmarksAsync(next);
         return next;
       });
     },
@@ -33,7 +54,7 @@ export function useBookmarks() {
   const removeBookmark = useCallback((key: string) => {
     setBookmarks((prev) => {
       const next = prev.filter((b) => b.key !== key);
-      setStoredBookmarks(next);
+      setStoredBookmarksAsync(next);
       return next;
     });
   }, []);
@@ -60,5 +81,5 @@ export function useBookmarks() {
     [bookmarks]
   );
 
-  return { bookmarks, addBookmark, removeBookmark, toggleBookmark, hasBookmark };
+  return { bookmarks, addBookmark, removeBookmark, toggleBookmark, hasBookmark, isHydrated };
 }

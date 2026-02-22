@@ -1,7 +1,3 @@
-/**
- * eMLM - Community Information App about Multi-Level Marketing (MLM)
- * No login, no admin. Static data. Neutral wording.
- */
 import React, { useState, useCallback } from "react";
 import { View, StyleSheet } from "react-native";
 import SafeView from "./src/components/SafeView";
@@ -38,8 +34,9 @@ import {
   NEWS_ITEMS,
 } from "./src/data";
 import { useBookmarks } from "./src/hooks/useBookmarks";
+import { useRecentlyViewed } from "./src/hooks/useRecentlyViewed";
 import { useCompanySignals } from "./src/hooks/useCompanySignals";
-import type { Route, RouteName } from "./src/types";
+import type { Route, RouteName, BookmarkType } from "./src/types";
 
 const TABS = [
   { key: "home", label: "Trang chủ" },
@@ -88,6 +85,7 @@ export default function App() {
 
   const { bookmarks, toggleBookmark, removeBookmark, hasBookmark } =
     useBookmarks();
+  const { recent, addRecentlyViewed, clearRecentlyViewed } = useRecentlyViewed();
   const { getCompanySignals, voteTransparent, voteResearch } =
     useCompanySignals(COMPANIES);
 
@@ -109,6 +107,13 @@ export default function App() {
   const handleAskQuestionSubmit = (question: string, topic: string) => {
     setPendingQuestions((prev) => [...prev, { question, topic }]);
   };
+
+  const handleClearAllBookmarks = useCallback(async () => {
+    // Clear all bookmarks by removing each one
+    for (const bookmark of bookmarks) {
+      removeBookmark(bookmark.key);
+    }
+  }, [bookmarks, removeBookmark]);
 
   const currentRoute = route;
   const showTabBar = isTabRoute;
@@ -135,9 +140,12 @@ export default function App() {
           <KnowledgeDetailScreen
             article={article}
             isBookmarked={hasBookmark("knowledge", id)}
-            onToggleBookmark={() =>
-              article && toggleBookmark("knowledge", id, article.title)
-            }
+            onToggleBookmark={() => {
+              if (article) {
+                toggleBookmark("knowledge", id, article.title);
+                addRecentlyViewed("knowledge", id, article.title);
+              }
+            }}
             onBack={back}
           />
         );
@@ -152,7 +160,13 @@ export default function App() {
       case "regulation-detail": {
         const id = (currentRoute.params?.id as string) || "";
         const doc = REGULATION_DOCS.find((d) => d.id === id);
-        return <RegulationDetailScreen doc={doc} onBack={back} />;
+        return (
+          <RegulationDetailScreen 
+            doc={doc} 
+            onBack={back}
+            onViewDetail={() => doc && addRecentlyViewed("regulation", doc.id, doc.title)}
+          />
+        );
       }
       case "company-list":
         return (
@@ -171,6 +185,7 @@ export default function App() {
             onVoteTransparent={voteTransparent}
             onVoteResearch={voteResearch}
             onBack={back}
+            onViewDetail={() => company && addRecentlyViewed("company", company.id, company.name)}
           />
         );
       }
@@ -188,9 +203,12 @@ export default function App() {
           <QADetailScreen
             item={item}
             isBookmarked={hasBookmark("qa", id)}
-            onToggleBookmark={() =>
-              item && toggleBookmark("qa", id, item.question)
-            }
+            onToggleBookmark={() => {
+              if (item) {
+                toggleBookmark("qa", id, item.question);
+                addRecentlyViewed("qa", id, item.question);
+              }
+            }}
             onBack={back}
           />
         );
@@ -216,9 +234,12 @@ export default function App() {
           <AlertDetailScreen
             alert={alert}
             isBookmarked={hasBookmark("alert", id)}
-            onToggleBookmark={() =>
-              alert && toggleBookmark("alert", id, alert.title)
-            }
+            onToggleBookmark={() => {
+              if (alert) {
+                toggleBookmark("alert", id, alert.title);
+                addRecentlyViewed("alert", id, alert.title);
+              }
+            }}
             onBack={back}
           />
         );
@@ -233,7 +254,13 @@ export default function App() {
       case "news-detail": {
         const id = (currentRoute.params?.id as string) || "";
         const newsItem = NEWS_ITEMS.find((n) => n.id === id);
-        return <NewsDetailScreen item={newsItem} onBack={back} />;
+        return (
+          <NewsDetailScreen 
+            item={newsItem} 
+            onBack={back}
+            onViewDetail={() => newsItem && addRecentlyViewed("news", newsItem.id, newsItem.title)}
+          />
+        );
       }
       case "search":
         return (
@@ -252,7 +279,10 @@ export default function App() {
         return (
           <BookmarksScreen
             bookmarks={bookmarks}
+            recentlyViewed={recent}
             onRemove={removeBookmark}
+            onClearRecent={clearRecentlyViewed}
+            onClearBookmarks={handleClearAllBookmarks}
             onNavigate={(r) => go(r.name, r.params)}
           />
         );

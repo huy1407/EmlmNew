@@ -67,6 +67,13 @@ export interface Bookmark {
   title: string;
 }
 
+export interface RecentlyViewedItem {
+  type: BookmarkType;
+  id: string;
+  title: string;
+  viewedAt: string;
+}
+
 export type RouteName =
   | "home"
   | "intro"

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, ScrollView, Pressable, Linking, StyleSheet } from "react-native";
 import DisclaimerBanner from "../components/DisclaimerBanner";
 import { shareWithDisclaimer } from "../utils";
@@ -10,12 +10,18 @@ const REGULATION_DISCLAIMER = "Nội dung không thay thế tư vấn pháp lý 
 interface RegulationDetailScreenProps {
   doc: RegulationDoc | undefined;
   onBack: () => void;
+  onViewDetail?: () => void;
 }
 
 export default function RegulationDetailScreen({
   doc,
   onBack,
+  onViewDetail,
 }: RegulationDetailScreenProps) {
+  useEffect(() => {
+    onViewDetail?.();
+  }, [doc?.id, onViewDetail]);
+
   if (!doc) return null;
 
   const handleOpenSource = () => {
