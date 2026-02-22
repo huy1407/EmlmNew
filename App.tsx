@@ -122,7 +122,13 @@ export default function App() {
   const renderContent = () => {
     switch (currentRoute.name) {
       case "home":
-        return <HomeScreen onNavigate={(r) => go(r.name, r.params)} />;
+        return (
+          <HomeScreen
+            onNavigate={(r) => go(r.name, r.params)}
+            bookmarks={bookmarks}
+            recentlyViewed={recent}
+          />
+        );
       case "intro":
         return <IntroScreen onBack={back} />;
       case "knowledge-list":

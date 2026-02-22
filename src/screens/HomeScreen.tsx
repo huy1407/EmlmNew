@@ -9,10 +9,14 @@ import {
 } from "react-native";
 import DisclaimerBanner from "../components/DisclaimerBanner";
 import CardButton from "../components/CardButton";
-import type { Route } from "../types";
+import BookmarksPreview from "../components/BookmarksPreview";
+import RecentlyViewedPreview from "../components/RecentlyViewedPreview";
+import type { Route, Bookmark, RecentlyViewedItem } from "../types";
 
 interface HomeScreenProps {
   onNavigate: (route: Route) => void;
+  bookmarks?: Bookmark[];
+  recentlyViewed?: RecentlyViewedItem[];
 }
 
 const FEATURES = [
@@ -24,7 +28,45 @@ const FEATURES = [
   { key: "news-list", title: "Tin tức" },
 ];
 
-export default function HomeScreen({ onNavigate }: HomeScreenProps) {
+export default function HomeScreen({
+  onNavigate,
+  bookmarks = [],
+  recentlyViewed = [],
+}: HomeScreenProps) {
+  const handleBookmarkItemPress = (bookmark: Bookmark) => {
+    switch (bookmark.type) {
+      case "knowledge":
+        return onNavigate({ name: "knowledge-detail", params: { id: bookmark.id } });
+      case "regulation":
+        return onNavigate({ name: "regulation-detail", params: { id: bookmark.id } });
+      case "company":
+        return onNavigate({ name: "company-detail", params: { id: bookmark.id } });
+      case "qa":
+        return onNavigate({ name: "qa-detail", params: { id: bookmark.id } });
+      case "alert":
+        return onNavigate({ name: "alert-detail", params: { id: bookmark.id } });
+      case "news":
+        return onNavigate({ name: "news-detail", params: { id: bookmark.id } });
+    }
+  };
+
+  const handleRecentItemPress = (item: RecentlyViewedItem) => {
+    switch (item.type) {
+      case "knowledge":
+        return onNavigate({ name: "knowledge-detail", params: { id: item.id } });
+      case "regulation":
+        return onNavigate({ name: "regulation-detail", params: { id: item.id } });
+      case "company":
+        return onNavigate({ name: "company-detail", params: { id: item.id } });
+      case "qa":
+        return onNavigate({ name: "qa-detail", params: { id: item.id } });
+      case "alert":
+        return onNavigate({ name: "alert-detail", params: { id: item.id } });
+      case "news":
+        return onNavigate({ name: "news-detail", params: { id: item.id } });
+    }
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
@@ -42,11 +84,30 @@ export default function HomeScreen({ onNavigate }: HomeScreenProps) {
         style={styles.riskAssessmentCard}
         onPress={() => onNavigate({ name: "risk-assessment" })}
       >
-        <Text style={styles.riskAssessmentTitle}>⚠️ Tự đánh giá rủi ro MLM</Text>
+        <Text style={styles.riskAssessmentTitle}>Tự đánh giá rủi ro MLM</Text>
         <Text style={styles.riskAssessmentDesc}>
           Bộ câu hỏi đơn giản giúp bạn tự suy nghĩ về mô hình
         </Text>
       </Pressable>
+
+      {/* Recently Viewed Preview */}
+      <RecentlyViewedPreview
+        items={recentlyViewed}
+        onItemPress={handleRecentItemPress}
+        onViewAllPress={() => onNavigate({ name: "bookmarks" })}
+      />
+
+      {/* Bookmarks Preview */}
+      <BookmarksPreview
+        bookmarks={bookmarks}
+        onItemPress={handleBookmarkItemPress}
+        onViewAllPress={() => onNavigate({ name: "bookmarks" })}
+      />
+
+      {/* Main Features Grid */}
+      <View style={styles.sectionLabel}>
+        <Text style={styles.sectionTitle}>Khám phá</Text>
+      </View>
 
       <View style={styles.grid}>
         {FEATURES.map((f) => (
@@ -79,7 +140,7 @@ const styles = StyleSheet.create({
   searchPlaceholder: { fontSize: 15, color: "#9CA3AF" },
   riskAssessmentCard: {
     marginHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 12,
     padding: 16,
     backgroundColor: "#FEF3C7",
     borderRadius: 14,
@@ -87,15 +148,25 @@ const styles = StyleSheet.create({
     borderColor: "#FCD34D",
   },
   riskAssessmentTitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: "700",
     color: "#78350F",
-    marginBottom: 6,
+    marginBottom: 4,
   },
   riskAssessmentDesc: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#92400E",
-    lineHeight: 20,
+    lineHeight: 18,
+  },
+  sectionLabel: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginTop: 4,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#111827",
   },
   grid: {
     flexDirection: "row",
