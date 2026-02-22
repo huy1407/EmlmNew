@@ -24,6 +24,9 @@ import BookmarksScreen from "./src/screens/BookmarksScreen";
 import SettingsScreen from "./src/screens/SettingsScreen";
 import LegalScreen from "./src/screens/LegalScreen";
 import RiskAssessmentScreen from "./src/screens/RiskAssessmentScreen";
+import LearningPathScreen from "./src/screens/LearningPathScreen";
+import CompanySelectScreen from "./src/screens/CompanySelectScreen";
+import CompanyCompareScreen from "./src/screens/CompanyCompareScreen";
 
 import {
   KNOWLEDGE_ARTICLES,
@@ -36,6 +39,7 @@ import {
 import { useBookmarks } from "./src/hooks/useBookmarks";
 import { useRecentlyViewed } from "./src/hooks/useRecentlyViewed";
 import { useCompanySignals } from "./src/hooks/useCompanySignals";
+import { useCompareHistory } from "./src/hooks/useCompareHistory";
 import type { Route, RouteName, BookmarkType } from "./src/types";
 
 const TABS = [
@@ -88,6 +92,7 @@ export default function App() {
   const { recent, addRecentlyViewed, clearRecentlyViewed } = useRecentlyViewed();
   const { getCompanySignals, voteTransparent, voteResearch } =
     useCompanySignals(COMPANIES);
+  const { addComparison } = useCompareHistory();
 
   const route = stack[stack.length - 1];
   const isTabRoute = TAB_ROUTES.includes(route.name);
@@ -296,6 +301,24 @@ export default function App() {
         return <SettingsScreen onNavigate={(r) => go(r.name, r.params)} />;
       case "risk-assessment":
         return <RiskAssessmentScreen />;
+      case "learning-path":
+        return <LearningPathScreen onNavigate={(r) => go(r.name, r.params)} />;
+      case "company-select":
+        return (
+          <CompanySelectScreen
+            onNavigate={(r) => go(r.name, r.params)}
+            onCompare={addComparison}
+          />
+        );
+      case "company-compare": {
+        const companyIds = (currentRoute.params?.companyIds as string[]) || [];
+        return (
+          <CompanyCompareScreen
+            companyIds={companyIds}
+            onNavigate={(r) => go(r.name, r.params)}
+          />
+        );
+      }
       case "privacy":
         return (
           <LegalScreen title="Privacy Policy" content={PRIVACY_CONTENT} />

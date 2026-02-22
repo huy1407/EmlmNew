@@ -11,6 +11,10 @@ import DisclaimerBanner from "../components/DisclaimerBanner";
 import CardButton from "../components/CardButton";
 import BookmarksPreview from "../components/BookmarksPreview";
 import RecentlyViewedPreview from "../components/RecentlyViewedPreview";
+import LearningPathCard from "../components/LearningPathCard";
+import CompanyCompareCard from "../components/CompanyCompareCard";
+import { useLearningProgress } from "../hooks/useLearningProgress";
+import { LEARNING_PATH } from "../data/learningPath";
 import type { Route, Bookmark, RecentlyViewedItem } from "../types";
 
 interface HomeScreenProps {
@@ -28,11 +32,25 @@ const FEATURES = [
   { key: "news-list", title: "Tin tức" },
 ];
 
+const FEATURES = [
+  { key: "knowledge-list", title: "Kiến thức MLM" },
+  { key: "regulation-list", title: "Pháp luật (tham khảo)" },
+  { key: "company-list", title: "Doanh nghiệp" },
+  { key: "qa-list", title: "Hỏi & đáp" },
+  { key: "alert-list", title: "Cảnh báo" },
+  { key: "news-list", title: "Tin tức" },
+];
+
 export default function HomeScreen({
   onNavigate,
   bookmarks = [],
   recentlyViewed = [],
 }: HomeScreenProps) {
+  const { getProgressPercentage } = useLearningProgress();
+  
+  const totalLessons = LEARNING_PATH.reduce((sum, day) => sum + day.lessons.length, 0);
+  const learningProgress = getProgressPercentage(totalLessons);
+
   const handleBookmarkItemPress = (bookmark: Bookmark) => {
     switch (bookmark.type) {
       case "knowledge":
@@ -89,6 +107,15 @@ export default function HomeScreen({
           Bộ câu hỏi đơn giản giúp bạn tự suy nghĩ về mô hình
         </Text>
       </Pressable>
+
+      {/* Learning Path Card */}
+      <LearningPathCard
+        progress={learningProgress}
+        onPress={() => onNavigate({ name: "learning-path" })}
+      />
+
+      {/* Company Compare Card */}
+      <CompanyCompareCard onPress={() => onNavigate({ name: "company-select" })} />
 
       {/* Recently Viewed Preview */}
       <RecentlyViewedPreview
