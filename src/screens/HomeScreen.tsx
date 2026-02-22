@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import BookmarksPreview from "../components/BookmarksPreview";
 import RecentlyViewedPreview from "../components/RecentlyViewedPreview";
 import LearningPathCard from "../components/LearningPathCard";
 import CompanyCompareCard from "../components/CompanyCompareCard";
+import RiskAssessmentWidget from "../components/RiskAssessmentWidget";
 import { useLearningProgress } from "../hooks/useLearningProgress";
 import { LEARNING_PATH } from "../data/learningPath";
 import type { Route, Bookmark, RecentlyViewedItem } from "../types";
@@ -32,21 +33,13 @@ const FEATURES = [
   { key: "news-list", title: "Tin tức" },
 ];
 
-const FEATURES = [
-  { key: "knowledge-list", title: "Kiến thức MLM" },
-  { key: "regulation-list", title: "Pháp luật (tham khảo)" },
-  { key: "company-list", title: "Doanh nghiệp" },
-  { key: "qa-list", title: "Hỏi & đáp" },
-  { key: "alert-list", title: "Cảnh báo" },
-  { key: "news-list", title: "Tin tức" },
-];
-
 export default function HomeScreen({
   onNavigate,
   bookmarks = [],
   recentlyViewed = [],
 }: HomeScreenProps) {
   const { getProgressPercentage } = useLearningProgress();
+  const [riskAssessmentExpanded, setRiskAssessmentExpanded] = useState(false);
   
   const totalLessons = LEARNING_PATH.reduce((sum, day) => sum + day.lessons.length, 0);
   const learningProgress = getProgressPercentage(totalLessons);
@@ -97,16 +90,11 @@ export default function HomeScreen({
 
       <DisclaimerBanner />
 
-      {/* Prominent Risk Assessment Tool */}
-      <Pressable
-        style={styles.riskAssessmentCard}
-        onPress={() => onNavigate({ name: "risk-assessment" })}
-      >
-        <Text style={styles.riskAssessmentTitle}>Tự đánh giá rủi ro MLM</Text>
-        <Text style={styles.riskAssessmentDesc}>
-          Bộ câu hỏi đơn giản giúp bạn tự suy nghĩ về mô hình
-        </Text>
-      </Pressable>
+      {/* Risk Assessment Widget - Inline */}
+      <RiskAssessmentWidget
+        isExpanded={riskAssessmentExpanded}
+        onToggleExpand={setRiskAssessmentExpanded}
+      />
 
       {/* Learning Path Card */}
       <LearningPathCard
@@ -165,26 +153,6 @@ const styles = StyleSheet.create({
     borderColor: "#E5E7EB",
   },
   searchPlaceholder: { fontSize: 15, color: "#9CA3AF" },
-  riskAssessmentCard: {
-    marginHorizontal: 16,
-    marginBottom: 12,
-    padding: 16,
-    backgroundColor: "#FEF3C7",
-    borderRadius: 14,
-    borderWidth: 2,
-    borderColor: "#FCD34D",
-  },
-  riskAssessmentTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#78350F",
-    marginBottom: 4,
-  },
-  riskAssessmentDesc: {
-    fontSize: 13,
-    color: "#92400E",
-    lineHeight: 18,
-  },
   sectionLabel: {
     paddingHorizontal: 16,
     paddingVertical: 12,
