@@ -1,16 +1,22 @@
-import React, { useMemo, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  StyleSheet,
   Alert,
+  Pressable,
+  ScrollView,
   Share,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
+
 import DisclaimerBanner from "../components/DisclaimerBanner";
+import {
+  RISK_QUESTIONS,
+  RISK_RESULT_DEFINITIONS,
+  RiskLevelKey,
+} from "../data/riskAssessment";
 import { theme } from "../styles/theme";
-import { RISK_QUESTIONS, RISK_RESULT_DEFINITIONS, RiskLevelKey } from "../data/riskAssessment";
 
 interface AnswerState {
   [id: string]: boolean | null;
@@ -25,10 +31,17 @@ interface RiskHistoryEntry {
 }
 
 const HISTORY_LIMIT = 20;
+const HISTORY_KEY = "@emlm/risk_history_v1";
 
-function getRiskLevel(score: number, total: number): RiskLevelKey {
-  if (score <= Math.floor(total * 0.3)) return "low";
-  if (score <= Math.floor(total * 0.65)) return "caution";
+/**
+ * Fixed thresholds for 20 questions:
+ * 0–5: low
+ * 6–12: caution
+ * 13–20: high
+ */
+function getRiskLevel(score: number): RiskLevelKey {
+  if (score <= 5) return "low";
+  if (score <= 12) return "caution";
   return "high";
 }
 
@@ -47,53 +60,89 @@ function formatDateTime(iso: string): string {
   }
 }
 
-export default function RiskAssessmentScreen() {
-  const [answers, setAnswers] = useState<AnswerState>(() => {
-    const initial: AnswerState = {};
-    RISK_QUESTIONS.forEach((q) => {
-      initial[q.id] = null;
-    });
-    return initial;
+function buildInitialAnswers(): AnswerState {
+  const initial: AnswerState = {};
+  RISK_QUESTIONS.forEach((q) => {
+    initial[q.id] = null;
   });
+  return initial;
+}
 
+export default function RiskAssessmentScreen() {
+  const [answers, setAnswers] = useState<AnswerState>(() => buildInitialAnswers());
   const [history, setHistory] = useState<RiskHistoryEntry[]>([]);
   const [lastResultId, setLastResultId] = useState<string | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const totalQuestions = RISK_QUESTIONS.length;
 
-  const { score, levelKey, allAnswered } = useMemo(() => {
+  // Load history once
+  useEffect(() => {
+    (async () => {
+      try {
+        const raw = await AsyncStorage.getItem(HISTORY_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) setHistory(parsed);
+        }
+      } catch {
+        // ignore
+      } finally {
+        setIsHydrated(true);
+      }
+    })();
+  }, []);
+
+  // Persist history whenever it changes (after hydration to avoid overwriting)
+  useEffect(() => {
+    if (!isHydrated) return;
+    (async () => {
+      try {
+        await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+      } catch {
+        // ignore
+      }
+    })();
+  }, [history, isHydrated]);
+
+  const { score, levelKey, answeredCount, allAnswered } = useMemo(() => {
     const yesCount = RISK_QUESTIONS.reduce(
       (count, q) => (answers[q.id] === true ? count + 1 : count),
       0
     );
-    const answeredCount = RISK_QUESTIONS.reduce(
+    const aCount = RISK_QUESTIONS.reduce(
       (count, q) => (answers[q.id] !== null ? count + 1 : count),
       0
     );
-    const lvl = getRiskLevel(yesCount, totalQuestions);
+    const lvl = getRiskLevel(yesCount);
+
     return {
       score: yesCount,
       levelKey: lvl,
-      allAnswered: answeredCount === totalQuestions,
+      answeredCount: aCount,
+      allAnswered: aCount === totalQuestions,
     };
   }, [answers, totalQuestions]);
 
-  const levelDef = RISK_RESULT_DEFINITIONS.find((d) => d.key === levelKey)!;
+  const levelDef =
+    RISK_RESULT_DEFINITIONS.find((d) => d.key === levelKey) ??
+    RISK_RESULT_DEFINITIONS[0];
 
   const handleSelect = (id: string, value: boolean) => {
     setAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleReset = () => {
-    const reset: AnswerState = {};
-    RISK_QUESTIONS.forEach((q) => {
-      reset[q.id] = null;
-    });
-    setAnswers(reset);
+    setAnswers(buildInitialAnswers());
     setLastResultId(null);
   };
 
   const handleSaveResult = () => {
+    if (!allAnswered) {
+      Alert.alert("Chưa hoàn tất", "Vui lòng trả lời tất cả câu hỏi trước khi lưu kết quả.");
+      return;
+    }
+
     const entry: RiskHistoryEntry = {
       id: `${Date.now()}`,
       createdAt: new Date().toISOString(),
@@ -101,12 +150,34 @@ export default function RiskAssessmentScreen() {
       total: totalQuestions,
       level: levelKey,
     };
-    setHistory((prev) => {
-      const next = [entry, ...prev].slice(0, HISTORY_LIMIT);
-      return next;
-    });
+
+    setHistory((prev) => [entry, ...prev].slice(0, HISTORY_LIMIT));
     setLastResultId(entry.id);
+
     Alert.alert("Đã lưu", "Kết quả tự đánh giá đã được lưu trong lịch sử trên thiết bị của bạn.");
+  };
+
+  const handleClearHistory = () => {
+    Alert.alert(
+      "Xóa lịch sử?",
+      "Thao tác này sẽ xóa toàn bộ lịch sử tự đánh giá được lưu cục bộ trên thiết bị.",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Xóa",
+          style: "destructive",
+          onPress: async () => {
+            setHistory([]);
+            setLastResultId(null);
+            try {
+              await AsyncStorage.removeItem(HISTORY_KEY);
+            } catch {
+              // ignore
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleShare = async () => {
@@ -116,35 +187,43 @@ export default function RiskAssessmentScreen() {
         "Kết quả tự đánh giá dấu hiệu rủi ro MLM:",
         `- Điểm: ${score}/${totalQuestions}`,
         `- Mức đánh giá: ${title}`,
+        allAnswered ? "" : "(Lưu ý: Kết quả này là tạm thời vì bạn chưa trả lời hết câu hỏi.)",
         "",
         "Ghi chú:",
         "• Đây chỉ là công cụ tham khảo, không phải kết luận chính thức.",
         "• Không thay thế tư vấn pháp lý, tài chính hoặc từ cơ quan có thẩm quyền.",
+        "",
+        "(eMLM) Ứng dụng cộng đồng. Thông tin chỉ mang tính tham khảo.",
       ];
 
       await Share.share({
         title: "Kết quả tự đánh giá rủi ro MLM",
-        message: messageLines.join("\n"),
+        message: messageLines.filter(Boolean).join("\n"),
       });
-    } catch (error) {
+    } catch {
       Alert.alert("Không thể chia sẻ", "Đã xảy ra lỗi khi chia sẻ kết quả. Vui lòng thử lại sau.");
     }
   };
 
-  const canSave = allAnswered;
-
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Tự đánh giá dấu hiệu rủi ro MLM</Text>
+
       <Text style={styles.subtitle}>
         Bộ câu hỏi đơn giản, ngoại tuyến, giúp bạn tự suy nghĩ về mô hình đang được giới thiệu.
-        Không lưu trữ dữ liệu lên máy chủ, chỉ sử dụng cục bộ trên thiết bị.
+        Ứng dụng không lưu dữ liệu lên máy chủ; lịch sử (nếu lưu) chỉ nằm cục bộ trên thiết bị.
       </Text>
 
       <DisclaimerBanner />
 
       <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Câu hỏi (Có/Không)</Text>
+        <View style={styles.progressRow}>
+          <Text style={styles.sectionTitle}>Câu hỏi (Có/Không)</Text>
+          <Text style={styles.progressText}>
+            Đã trả lời: {answeredCount}/{totalQuestions}
+          </Text>
+        </View>
+
         <Text style={styles.sectionHint}>
           Mỗi câu trả lời &quot;Có&quot; được tính 1 điểm. Hãy đánh dấu theo cảm nhận trung thực của bạn.
         </Text>
@@ -157,6 +236,7 @@ export default function RiskAssessmentScreen() {
                 <Text style={styles.questionIndex}>{index + 1}.</Text>
                 <View style={styles.questionContent}>
                   <Text style={styles.questionText}>{q.text}</Text>
+
                   <View style={styles.answerRow}>
                     <Pressable
                       style={({ pressed }) => [
@@ -175,6 +255,7 @@ export default function RiskAssessmentScreen() {
                         Có
                       </Text>
                     </Pressable>
+
                     <Pressable
                       style={({ pressed }) => [
                         styles.answerButton,
@@ -209,13 +290,14 @@ export default function RiskAssessmentScreen() {
           >
             <Text style={styles.secondaryButtonText}>Làm lại</Text>
           </Pressable>
+
           <Pressable
             style={({ pressed }) => [
               styles.primaryButton,
-              (!allAnswered || !canSave) && styles.primaryButtonDisabled,
+              !allAnswered && styles.primaryButtonDisabled,
               pressed && allAnswered && styles.primaryButtonPressed,
             ]}
-            onPress={canSave ? handleSaveResult : undefined}
+            onPress={allAnswered ? handleSaveResult : undefined}
           >
             <Text style={styles.primaryButtonText}>
               {allAnswered ? "Lưu kết quả" : "Trả lời hết để lưu"}
@@ -226,9 +308,11 @@ export default function RiskAssessmentScreen() {
 
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Kết quả hiện tại</Text>
+
         <Text style={styles.resultScore}>
           {score}/{totalQuestions} câu trả lời &quot;Có&quot;
         </Text>
+
         <Text style={styles.resultLevel}>{levelDef.title}</Text>
         <Text style={styles.resultSubtitle}>{levelDef.subtitle}</Text>
         <Text style={styles.resultGuidance}>{levelDef.guidance}</Text>
@@ -240,12 +324,29 @@ export default function RiskAssessmentScreen() {
           ]}
           onPress={handleShare}
         >
-          <Text style={styles.outlineButtonText}>Chia sẻ kết quả (kèm lưu ý)</Text>
+          <Text style={styles.outlineButtonText}>
+            Chia sẻ kết quả (kèm lưu ý)
+          </Text>
         </Pressable>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Lịch sử trên thiết bị</Text>
+        <View style={styles.historyHeaderRow}>
+          <Text style={styles.sectionTitle}>Lịch sử trên thiết bị</Text>
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.dangerButton,
+              pressed && styles.dangerButtonPressed,
+            ]}
+            onPress={history.length ? handleClearHistory : undefined}
+          >
+            <Text style={styles.dangerButtonText}>
+              {history.length ? "Xóa lịch sử" : "Chưa có lịch sử"}
+            </Text>
+          </Pressable>
+        </View>
+
         <Text style={styles.sectionHint}>
           Chỉ lưu cục bộ trên thiết bị của bạn. Bạn có thể xóa dữ liệu ứng dụng nếu không muốn lưu nữa.
         </Text>
@@ -274,6 +375,7 @@ export default function RiskAssessmentScreen() {
                       {def?.title ?? "Kết quả"}
                     </Text>
                   </View>
+
                   <Text style={styles.historyDate}>{formatDateTime(item.createdAt)}</Text>
                 </View>
               );
@@ -288,6 +390,7 @@ export default function RiskAssessmentScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: 16, paddingBottom: 32, gap: 16 },
+
   title: {
     fontSize: 20,
     fontWeight: "700",
@@ -300,12 +403,25 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     marginBottom: 4,
   },
+
   card: {
     backgroundColor: theme.colors.card,
     borderRadius: theme.radius.lg,
     padding: 14,
     ...theme.shadow,
   },
+
+  progressRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "baseline",
+    gap: 8,
+  },
+  progressText: {
+    fontSize: 12,
+    color: theme.colors.muted,
+  },
+
   sectionTitle: {
     fontSize: 15,
     fontWeight: "600",
@@ -317,6 +433,7 @@ const styles = StyleSheet.create({
     color: theme.colors.muted,
     marginBottom: 8,
   },
+
   questionsList: {
     marginTop: 4,
     gap: 8,
@@ -331,14 +448,13 @@ const styles = StyleSheet.create({
     color: theme.colors.muted,
     marginTop: 2,
   },
-  questionContent: {
-    flex: 1,
-  },
+  questionContent: { flex: 1 },
   questionText: {
     fontSize: 13,
     color: theme.colors.text,
     lineHeight: 18,
   },
+
   answerRow: {
     flexDirection: "row",
     gap: 8,
@@ -362,20 +478,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3F4F6",
     borderColor: "#9CA3AF",
   },
-  answerButtonPressed: {
-    opacity: 0.85,
-  },
+  answerButtonPressed: { opacity: 0.85 },
+
   answerLabel: {
     fontSize: 13,
     fontWeight: "500",
     color: theme.colors.text,
   },
-  answerLabelSelectedYes: {
-    color: "#166534",
-  },
-  answerLabelSelectedNo: {
-    color: "#374151",
-  },
+  answerLabelSelectedYes: { color: "#166534" },
+  answerLabelSelectedNo: { color: "#374151" },
+
   actionsRow: {
     flexDirection: "row",
     gap: 8,
@@ -391,13 +503,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#F9FAFB",
   },
-  secondaryButtonPressed: {
-    opacity: 0.8,
-  },
+  secondaryButtonPressed: { opacity: 0.8 },
   secondaryButtonText: {
     fontSize: 13,
     color: theme.colors.text,
   },
+
   primaryButton: {
     flex: 2,
     paddingVertical: 8,
@@ -406,17 +517,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: theme.colors.primary,
   },
-  primaryButtonDisabled: {
-    backgroundColor: "#9CA3AF",
-  },
-  primaryButtonPressed: {
-    opacity: 0.9,
-  },
+  primaryButtonDisabled: { backgroundColor: "#9CA3AF" },
+  primaryButtonPressed: { opacity: 0.9 },
   primaryButtonText: {
     fontSize: 13,
     color: "#fff",
     fontWeight: "600",
   },
+
   resultScore: {
     marginTop: 4,
     fontSize: 14,
@@ -440,6 +548,7 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     lineHeight: 18,
   },
+
   outlineButton: {
     marginTop: 12,
     paddingVertical: 8,
@@ -450,18 +559,36 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#EFF6FF",
   },
-  outlineButtonPressed: {
-    opacity: 0.9,
-  },
+  outlineButtonPressed: { opacity: 0.9 },
   outlineButtonText: {
     fontSize: 13,
     color: "#1D4ED8",
     fontWeight: "600",
   },
-  historyList: {
-    marginTop: 8,
-    gap: 8,
+
+  historyHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 4,
   },
+  dangerButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "#FECACA",
+    backgroundColor: "#FEF2F2",
+  },
+  dangerButtonPressed: { opacity: 0.85 },
+  dangerButtonText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#B91C1C",
+  },
+
+  historyList: { marginTop: 8, gap: 8 },
   historyItem: {
     padding: 10,
     borderRadius: theme.radius.md,
@@ -492,10 +619,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: theme.colors.muted,
   },
+
   emptyHistoryText: {
     marginTop: 6,
     fontSize: 12,
     color: theme.colors.muted,
   },
 });
-
