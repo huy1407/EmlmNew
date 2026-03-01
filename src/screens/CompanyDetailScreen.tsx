@@ -6,6 +6,7 @@ import {
   Pressable,
   Linking,
   StyleSheet,
+  Alert,
 } from "react-native";
 import DisclaimerBanner from "../components/DisclaimerBanner";
 import { computePct } from "../utils";
@@ -41,7 +42,19 @@ export default function CompanyDetailScreen({
   );
 
   const handleOpenWebsite = () => {
-    if (company.websiteUrl) Linking.openURL(company.websiteUrl);
+    if (company.websiteUrl) {
+      Alert.alert(
+        "Mở liên kết bên ngoài",
+        "Bạn sắp rời khỏi ứng dụng. Thông tin chỉ mang tính tham khảo.",
+        [
+          { text: "Hủy", style: "cancel" },
+          {
+            text: "Mở",
+            onPress: () => Linking.openURL(company.websiteUrl!),
+          },
+        ]
+      );
+    }
   };
 
   return (
@@ -60,7 +73,7 @@ export default function CompanyDetailScreen({
       )}
       {company.websiteUrl && (
         <Pressable style={styles.linkBtn} onPress={handleOpenWebsite}>
-          <Text style={styles.linkText}>Mở website</Text>
+          <Text style={styles.linkText}>Mở website tham khảo</Text>
         </Pressable>
       )}
       <View style={styles.signals}>

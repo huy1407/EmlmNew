@@ -12,7 +12,8 @@ export interface RegulationDoc {
   id: string;
   title: string;
   summary: string;
-  sourceUrl: string;
+  content: string;
+  sourceUrl?: string;
   updatedAt: string;
 }
 
@@ -48,7 +49,8 @@ export interface NewsItem {
   id: string;
   title: string;
   summary: string;
-  sourceUrl: string;
+  content: string;
+  sourceUrl?: string;
   publishedAt: string;
 }
 
