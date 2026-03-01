@@ -21,8 +21,13 @@ export interface Company {
   id: string;
   name: string;
   shortDesc: string;
+  description?: string;
+  licenseStatus?: "licensed" | "unknown";
+  foundedYear?: number;
+  headquarters?: string;
   websiteUrl?: string;
   tags: string[];
+  productCategories?: string[];
   communitySignals: {
     transparentCount: number;
     researchCount: number;

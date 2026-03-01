@@ -60,24 +60,87 @@ export default function CompanyDetailScreen({
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <DisclaimerBanner />
+      
+      {/* Header */}
       <Text style={styles.title}>{company.name}</Text>
       <Text style={styles.desc}>{company.shortDesc}</Text>
-      {company.tags.length > 0 && (
-        <View style={styles.tags}>
-          {company.tags.map((t) => (
-            <View key={t} style={styles.tag}>
-              <Text style={styles.tagText}>{t}</Text>
-            </View>
-          ))}
+      
+      {/* License Status Badge */}
+      {company.licenseStatus && (
+        <View style={[styles.badge, company.licenseStatus === "licensed" ? styles.licensedBadge : styles.unknownBadge]}>
+          <Text style={styles.badgeText}>
+            {company.licenseStatus === "licensed" ? "✓ Có giấy phép" : "? Tình trạng chưa rõ"}
+          </Text>
         </View>
       )}
+
+      {/* Company Information */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Thông tin công ty</Text>
+        <View style={styles.infoGrid}>
+          {company.foundedYear && (
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Thành lập</Text>
+              <Text style={styles.infoValue}>{company.foundedYear}</Text>
+            </View>
+          )}
+          {company.headquarters && (
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Trụ sở chính</Text>
+              <Text style={styles.infoValue}>{company.headquarters}</Text>
+            </View>
+          )}
+        </View>
+      </View>
+
+      {/* Full Description */}
+      {company.description && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Giới thiệu chi tiết</Text>
+          <Text style={styles.descriptionText}>{company.description}</Text>
+        </View>
+      )}
+
+      {/* Product Categories */}
+      {company.productCategories && company.productCategories.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Nhóm sản phẩm</Text>
+          <View style={styles.categoryList}>
+            {company.productCategories.map((cat, idx) => (
+              <View key={idx} style={styles.categoryItem}>
+                <Text style={styles.categoryDot}>•</Text>
+                <Text style={styles.categoryText}>{cat}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+
+      {/* Tags */}
+      {company.tags.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Phân loại</Text>
+          <View style={styles.tags}>
+            {company.tags.map((t) => (
+              <View key={t} style={styles.tag}>
+                <Text style={styles.tagText}>{t}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+
+      {/* Website Link */}
       {company.websiteUrl && (
         <Pressable style={styles.linkBtn} onPress={handleOpenWebsite}>
           <Text style={styles.linkText}>Mở website tham khảo</Text>
         </Pressable>
       )}
-      <View style={styles.signals}>
-        <Text style={styles.signalsTitle}>Tín hiệu cộng đồng</Text>
+
+      {/* Community Signals */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Tín hiệu cộng đồng</Text>
+        <Text style={styles.signalsDesc}>Phản hồi từ cộng đồng người sử dụng</Text>
         <View style={styles.buttons}>
           <Pressable
             style={styles.signalBtn}
@@ -103,41 +166,120 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: 16, paddingBottom: 32 },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "700",
     color: theme.colors.text,
     marginBottom: 8,
   },
   desc: {
-    fontSize: 16,
+    fontSize: 15,
     color: theme.colors.muted,
-    lineHeight: 24,
+    lineHeight: 22,
     marginBottom: 12,
   },
-  tags: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 16 },
-  tag: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    backgroundColor: theme.colors.border,
-  },
-  tagText: { fontSize: 13, color: theme.colors.muted },
-  linkBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    backgroundColor: theme.colors.primary,
-    borderRadius: 8,
+  badge: {
     alignSelf: "flex-start",
-    marginBottom: 24,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginBottom: 16,
   },
-  linkText: { fontSize: 14, fontWeight: "600", color: "#fff" },
-  signals: { marginTop: 8 },
-  signalsTitle: {
-    fontSize: 16,
+  licensedBadge: {
+    backgroundColor: "#DCFCE7",
+    borderWidth: 1,
+    borderColor: "#86EFAC",
+  },
+  unknownBadge: {
+    backgroundColor: "#FEF3C7",
+    borderWidth: 1,
+    borderColor: "#FCD34D",
+  },
+  badgeText: {
+    fontSize: 13,
     fontWeight: "600",
+    color: "#374151",
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
     color: theme.colors.text,
     marginBottom: 12,
   },
+  signalsDesc: {
+    fontSize: 13,
+    color: theme.colors.muted,
+    marginBottom: 12,
+  },
+  infoGrid: {
+    gap: 12,
+  },
+  infoItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: theme.colors.card,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  infoLabel: {
+    fontSize: 12,
+    color: theme.colors.muted,
+    marginBottom: 4,
+  },
+  infoValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.text,
+  },
+  descriptionText: {
+    fontSize: 14,
+    color: theme.colors.text,
+    lineHeight: 22,
+    backgroundColor: theme.colors.card,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  categoryList: {
+    gap: 8,
+  },
+  categoryItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    paddingVertical: 6,
+  },
+  categoryDot: {
+    fontSize: 16,
+    color: theme.colors.primary,
+    marginRight: 10,
+    marginTop: -2,
+  },
+  categoryText: {
+    fontSize: 14,
+    color: theme.colors.text,
+    flex: 1,
+  },
+  tags: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  tag: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    backgroundColor: theme.colors.border,
+  },
+  tagText: { fontSize: 13, color: theme.colors.muted, fontWeight: "500" },
+  linkBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 8,
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  linkText: { fontSize: 15, fontWeight: "600", color: "#fff" },
   buttons: { flexDirection: "row", gap: 12 },
   signalBtn: {
     flex: 1,
@@ -148,5 +290,5 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
   },
   signalBtnText: { fontSize: 14, fontWeight: "600", color: theme.colors.text },
-  signalPct: { fontSize: 18, fontWeight: "700", color: theme.colors.primary, marginTop: 4 },
+  signalPct: { fontSize: 20, fontWeight: "700", color: theme.colors.primary, marginTop: 8 },
 });
