@@ -30,16 +30,9 @@ const FEATURES = [
   { key: "qa-list", title: "Hỏi & đáp" },
   { key: "alert-list", title: "Cảnh báo" },
   { key: "news-list", title: "Tin tức" },
+  { key: "risk-assessment", title: "Tự đánh giá rủi ro" },
 ];
 
-const FEATURES = [
-  { key: "knowledge-list", title: "Kiến thức MLM" },
-  { key: "regulation-list", title: "Pháp luật (tham khảo)" },
-  { key: "company-list", title: "Doanh nghiệp" },
-  { key: "qa-list", title: "Hỏi & đáp" },
-  { key: "alert-list", title: "Cảnh báo" },
-  { key: "news-list", title: "Tin tức" },
-];
 
 export default function HomeScreen({
   onNavigate,
