@@ -173,7 +173,10 @@ export default function CompanyMLMListScreen({
           <CompanyMLMItem
             item={item}
             onPress={() => {
-              // Can be extended to navigate to detail screen
+              onNavigate({
+                name: "company-detail",
+                params: { company: item },
+              });
             }}
           />
         )}
