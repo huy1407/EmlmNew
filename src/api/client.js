@@ -230,15 +230,39 @@ export const getListCompany = () =>
   });
 
 /**
- * Fetch multi-level marketing companies (wrapper with error handling)
- * @returns {Promise<Array>} Array of MLM companies, empty array on error
+ * Fetch multi-level marketing company detail from VCCA SOAP API
+ * @param {string} sId - Company ID
+ * @returns {Promise} Company detail data
  */
-export async function fetchMLMCompanies() {
-  try {
-    const companies = await getListCompany();
-    return companies || [];
-  } catch (error) {
-    console.error("[v0] Error fetching MLM companies from VCCA API:", error);
-    return [];
-  }
-}
+export const getCompanyDetail = (sId) =>
+  new Promise((resolve, reject) => {
+    let xmls = `<?xml version="1.0" encoding="utf-8"?>
+    <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+    <VccaDNBHDCDetail xmlns="http://tempuri.org/">
+        <sId>${sId}</sId>
+    </VccaDNBHDCDetail>
+    </soap:Body>
+    </soap:Envelope>`;
+    apiRootVCCA
+      .get(BASE_API_URL_VCCA + '/VccaDNBHDCDetail?sId=' + sId, xmls, {
+        headers: {
+          SOAPAction: 'http://tempuri.org/VccaDNBHDCDetail',
+          'Content-Type': 'text/xml; charset=utf-8',
+        },
+      })
+      .then(response => {
+        try {
+          const detail = xmlStringToObject(response.data);
+          console.log("[v0] MLM company detail fetched:", detail);
+          resolve(detail);
+        } catch (parseError) {
+          console.error("[v0] Error parsing MLM company detail:", parseError);
+          reject(parseError);
+        }
+      })
+      .catch(error => {
+        console.error("[v0] Error fetching MLM company detail:", error);
+        reject(error);
+      });
+  });

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DisclaimerBanner from "../components/DisclaimerBanner";
+import { getCompanyDetail } from "../api/client";
 import type { CompanyMLM } from "../types";
 import { theme } from "../styles/theme";
 
@@ -24,11 +25,39 @@ interface ExpandableSection {
   content?: string;
 }
 
+interface CompanyDetailData {
+  [key: string]: any;
+}
+
 export default function CompanyMLMDetailScreen({
   company,
   onBack,
 }: CompanyMLMDetailScreenProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [detailData, setDetailData] = useState<CompanyDetailData | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (company?.id) {
+      loadCompanyDetail(company.id);
+    }
+  }, [company?.id]);
+
+  const loadCompanyDetail = async (companyId: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await getCompanyDetail(companyId);
+      console.log("[v0] Company detail data:", data);
+      setDetailData(data);
+    } catch (err) {
+      console.error("[v0] Error loading company detail:", err);
+      setError("Không thể tải chi tiết doanh nghiệp");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const sections: ExpandableSection[] = [
     { id: "registration", title: "Hộ số chung" },
@@ -61,6 +90,31 @@ export default function CompanyMLMDetailScreen({
     setExpandedSections(newExpanded);
   };
 
+  const getSectionContent = (sectionId: string): string => {
+    if (!detailData) {
+      return "Đang tải dữ liệu...";
+    }
+
+    switch (sectionId) {
+      case "registration":
+        return detailData.sHoSoChung || "Không có dữ liệu";
+      case "updated":
+        return detailData.sHoSoCapNhat || "Không có dữ liệu";
+      case "locations":
+        return detailData.sNoiKinhDoanh || "Không có dữ liệu";
+      case "representative":
+        return detailData.sThongTinNguoiDaiDien || "Không có dữ liệu";
+      case "owner":
+        return detailData.sThongTinChuSoHuu || "Không có dữ liệu";
+      case "complaints":
+        return detailData.sKhieuNai || "Không có dữ liệu";
+      case "evaluation":
+        return detailData.sDanhGia || "Không có dữ liệu";
+      default:
+        return "Không có dữ liệu";
+    }
+  };
+
   const handleShare = async () => {
     try {
       await Share.share({
@@ -75,6 +129,19 @@ export default function CompanyMLMDetailScreen({
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <DisclaimerBanner />
+
+      {isLoading && (
+        <View style={styles.loadingIndicator}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      )}
+
+      {error && (
+        <View style={styles.errorBanner}>
+          <Ionicons name="alert-circle" size={20} color="#EF4444" />
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      )}
 
       {/* Company Card */}
       <View style={styles.companyCard}>
@@ -103,7 +170,7 @@ export default function CompanyMLMDetailScreen({
                 style={styles.addressIcon}
               />
               <Text style={styles.addressText} numberOfLines={3}>
-                Thông tin địa chỉ sẽ được cập nhật từ API
+                {detailData?.sDiaChi || "Thông tin địa chỉ sẽ được cập nhật"}
               </Text>
             </View>
 
@@ -147,7 +214,125 @@ export default function CompanyMLMDetailScreen({
             {expandedSections.has(section.id) && (
               <View style={styles.sectionContent}>
                 <Text style={styles.contentText}>
-                  Thông tin sẽ được cập nhật từ API
+                  {getSectionContent(section.id)}
+                </Text>
+              </View>
+            )}
+
+            <View style={styles.divider} />
+          </View>
+        ))}
+      </View>
+
+      {/* Registration Info Summary */}
+      <View style={styles.summarySection}>
+        <View style={styles.summaryItem}>
+          <Text style={styles.summaryLabel}>GCN đăng ký doanh nghiệp:</Text>
+          <Text style={styles.summaryValue}>
+            {company.sodangkydoanhnghiep || "N/A"}
+          </Text>
+        </View>
+        <View style={styles.divider} />
+        <View style={styles.summaryItem}>
+          <Text style={styles.summaryLabel}>GCN đăng ký hoạt động BHDC:</Text>
+          <Text style={styles.summaryValue}>
+            {company.sodangkyhoatdong || "N/A"}
+          </Text>
+        </View>
+      </View>
+    </ScrollView>
+  );
+}
+
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <DisclaimerBanner />
+
+      {isLoading && (
+        <View style={styles.loadingIndicator}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      )}
+
+      {error && (
+        <View style={styles.errorBanner}>
+          <Ionicons name="alert-circle" size={20} color="#EF4444" />
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      )}
+
+      {/* Company Card */}
+      <View style={styles.companyCard}>
+        <View style={styles.cardHeader}>
+          {/* Logo Placeholder */}
+          <View style={styles.logoContainer}>
+            <Ionicons
+              name="business"
+              size={48}
+              color={theme.colors.primary}
+            />
+          </View>
+
+          {/* Company Info */}
+          <View style={styles.companyInfo}>
+            <Text style={styles.companyName} numberOfLines={2}>
+              {company.ten}
+            </Text>
+
+            {/* Address */}
+            <View style={styles.addressRow}>
+              <Ionicons
+                name="location-outline"
+                size={16}
+                color={theme.colors.primary}
+                style={styles.addressIcon}
+              />
+              <Text style={styles.addressText} numberOfLines={3}>
+                {detailData?.sDiaChi || "Thông tin địa chỉ sẽ được cập nhật"}
+              </Text>
+            </View>
+
+            {/* Status Badge */}
+            <View style={styles.statusBadge}>
+              <View style={styles.statusDot} />
+              <Text style={styles.statusText}>Đang hoạt động</Text>
+            </View>
+          </View>
+
+          {/* Share Button */}
+          <Pressable
+            style={styles.shareButton}
+            onPress={handleShare}
+          >
+            <Ionicons
+              name="share-social"
+              size={24}
+              color="#fff"
+            />
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Expandable Sections */}
+      <View style={styles.sectionsContainer}>
+        {sections.map((section) => (
+          <View key={section.id}>
+            <Pressable
+              style={styles.sectionHeader}
+              onPress={() => toggleSection(section.id)}
+            >
+              <Text style={styles.sectionTitle}>{section.title}</Text>
+              <Ionicons
+                name={expandedSections.has(section.id) ? "chevron-down" : "chevron-forward"}
+                size={24}
+                color={theme.colors.muted}
+              />
+            </Pressable>
+
+            {expandedSections.has(section.id) && (
+              <View style={styles.sectionContent}>
+                <Text style={styles.contentText}>
+                  {getSectionContent(section.id)}
                 </Text>
               </View>
             )}
@@ -195,6 +380,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: theme.colors.muted,
     fontWeight: "500",
+  },
+  loadingIndicator: {
+    paddingVertical: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FEE2E2",
+    marginHorizontal: 16,
+    marginVertical: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderRadius: 8,
+    gap: 8,
+  },
+  errorText: {
+    fontSize: 13,
+    color: "#EF4444",
+    fontWeight: "500",
+    flex: 1,
   },
 
   // Company Card
