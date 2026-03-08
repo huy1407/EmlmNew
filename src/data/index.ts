@@ -239,8 +239,6 @@ export const COMPANIES: Company[] = [
     productCategories: ["Thực phẩm bảo vệ sức khỏe", "Vitamin tự nhiên", "Sản phẩm wellness"],
     communitySignals: { transparentCount: 110, researchCount: 40 },
   },
-    communitySignals: { transparentCount: 110, researchCount: 70 },
-  },
   {
     id: "c11",
     name: "Công ty TNHH Perfect Global (Việt Nam)",

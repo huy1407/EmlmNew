@@ -60,11 +60,11 @@ export default function CompanyDetailScreen({
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <DisclaimerBanner />
-      
+
       {/* Header */}
       <Text style={styles.title}>{company.name}</Text>
       <Text style={styles.desc}>{company.shortDesc}</Text>
-      
+
       {/* License Status Badge */}
       {company.licenseStatus && (
         <View style={[styles.badge, company.licenseStatus === "licensed" ? styles.licensedBadge : styles.unknownBadge]}>
@@ -131,11 +131,11 @@ export default function CompanyDetailScreen({
       )}
 
       {/* Website Link */}
-      {company.websiteUrl && (
-        <Pressable style={styles.linkBtn} onPress={handleOpenWebsite}>
-          <Text style={styles.linkText}>Mở website tham khảo</Text>
-        </Pressable>
-      )}
+      {/*{company.websiteUrl && (*/}
+      {/*  <Pressable style={styles.linkBtn} onPress={handleOpenWebsite}>*/}
+      {/*    <Text style={styles.linkText}>Mở website tham khảo</Text>*/}
+      {/*  </Pressable>*/}
+      {/*)}*/}
 
       {/* Community Signals */}
       <View style={styles.section}>

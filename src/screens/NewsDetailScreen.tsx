@@ -44,18 +44,18 @@ export default function NewsDetailScreen({ item, onViewDetail }: NewsDetailScree
       <Text style={styles.title}>{item.title}</Text>
       <Text style={styles.meta}>{formatDate(item.publishedAt)}</Text>
       <Text style={styles.summary}>{item.summary}</Text>
-      
+
       {/* Full content displayed natively */}
       <Text style={styles.contentLabel}>Nội dung:</Text>
       <Text style={styles.contentText}>{item.content}</Text>
 
       {/* Actions */}
       <View style={styles.actions}>
-        {item.sourceUrl && (
-          <Pressable style={styles.btn} onPress={handleOpenSource}>
-            <Text style={styles.btnText}>Mở tài liệu tham khảo</Text>
-          </Pressable>
-        )}
+        {/*{item.sourceUrl && (*/}
+        {/*  <Pressable style={styles.btn} onPress={handleOpenSource}>*/}
+        {/*    <Text style={styles.btnText}>Mở tài liệu tham khảo</Text>*/}
+        {/*  </Pressable>*/}
+        {/*)}*/}
         <Pressable style={styles.btn} onPress={handleShare}>
           <Text style={styles.btnText}>Chia sẻ</Text>
         </Pressable>
