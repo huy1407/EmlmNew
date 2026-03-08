@@ -59,6 +59,8 @@ export interface NewsItem {
   publishedAt: string;
   imageUrl?: string;
   modify?: string;
+  category_ids?: string;
+  files_url?: string;
 }
 
 export type BookmarkType =
