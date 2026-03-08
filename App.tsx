@@ -172,8 +172,8 @@ export default function App() {
         const id = (currentRoute.params?.id as string) || "";
         const doc = REGULATION_DOCS.find((d) => d.id === id);
         return (
-          <RegulationDetailScreen 
-            doc={doc} 
+          <RegulationDetailScreen
+            doc={doc}
             onBack={back}
             onViewDetail={() => doc && addRecentlyViewed("regulation", doc.id, doc.title)}
           />
@@ -258,7 +258,7 @@ export default function App() {
       case "news-list":
         return (
           <NewsListScreen
-            news={NEWS_ITEMS}
+          //  news={NEWS_ITEMS}
             onNavigate={(r) => go(r.name, r.params)}
           />
         );
@@ -266,8 +266,8 @@ export default function App() {
         const id = (currentRoute.params?.id as string) || "";
         const newsItem = NEWS_ITEMS.find((n) => n.id === id);
         return (
-          <NewsDetailScreen 
-            item={newsItem} 
+          <NewsDetailScreen
+            item={newsItem}
             onBack={back}
             onViewDetail={() => newsItem && addRecentlyViewed("news", newsItem.id, newsItem.title)}
           />

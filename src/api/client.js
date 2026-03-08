@@ -50,7 +50,7 @@ export async function fetchCaseStudies() {
  * Parses SOAP XML response and returns formatted news items
  */
 export async function fetchNews() {
-  const SOAP_URL = "https://emlm.top";
+  const SOAP_URL = "https://www.emlm.top";
   const soapBody = `<?xml version="1.0" encoding="utf-8"?>
     <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Body>
@@ -73,20 +73,20 @@ export async function fetchNews() {
     }
 
     const xmlText = await response.text();
-    
+
     // Parse SOAP XML response
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-    
+
     // Extract the result string from SOAP response
     const resultElement = xmlDoc.querySelector("VccaListTin1Result");
     if (!resultElement) {
       console.warn("No VccaListTin1Result found in SOAP response");
       return [];
     }
-    
+
     const resultText = resultElement.textContent || "";
-    
+
     // Parse JSON array from result
     let newsArray = [];
     if (resultText) {

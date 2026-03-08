@@ -24,11 +24,11 @@ interface NewsListScreenProps {
 }
 
 export default function NewsListScreen({
-  news: staticNews,
+  // news: staticNews,
   onNavigate,
 }: NewsListScreenProps) {
-  const [news, setNews] = useState<NewsItem[]>(staticNews);
-  const [filteredNews, setFilteredNews] = useState<NewsItem[]>(staticNews);
+  const [news, setNews] = useState<NewsItem[]>();
+  const [filteredNews, setFilteredNews] = useState<NewsItem[]>();
   const [searchText, setSearchText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -45,7 +45,7 @@ export default function NewsListScreen({
       setFilteredNews(news);
     } else {
       const searchLower = searchText.toLowerCase();
-      const filtered = news.filter(
+      const filtered = news?.filter(
         (item) =>
           item.title.toLowerCase().includes(searchLower) ||
           item.summary.toLowerCase().includes(searchLower)
@@ -58,9 +58,9 @@ export default function NewsListScreen({
     setIsLoading(true);
     try {
       const fetchedNews = await fetchNews();
-      if (fetchedNews && fetchedNews.length > 0) {
+      if (fetchedNews && fetchedNews?.length > 0) {
         // Merge fetched news with static news, prioritizing fetched data
-        const mergedNews = [...fetchedNews, ...staticNews];
+        const mergedNews = [...fetchedNews];
         // Remove duplicates based on title
         const uniqueNews = Array.from(
           new Map(mergedNews.map((item) => [item.title, item])).values()
@@ -69,14 +69,14 @@ export default function NewsListScreen({
         setFilteredNews(uniqueNews);
       } else {
         // Fall back to static news if API fails
-        setNews(staticNews);
-        setFilteredNews(staticNews);
+        // setNews(staticNews);
+        // setFilteredNews(staticNews);
       }
     } catch (error) {
       console.error("Error loading news:", error);
       // Use static news as fallback
-      setNews(staticNews);
-      setFilteredNews(staticNews);
+      // setNews(staticNews);
+      // setFilteredNews(staticNews);
     } finally {
       setIsLoading(false);
     }
@@ -147,7 +147,7 @@ export default function NewsListScreen({
     </View>
   );
 
-  if (isLoading && news.length === 0) {
+  if (isLoading && news?.length === 0) {
     return (
       <View style={{ flex: 1 }}>
         <DisclaimerBanner />
@@ -181,7 +181,7 @@ export default function NewsListScreen({
           />
         }
         contentContainerStyle={
-          filteredNews.length === 0 ? styles.emptyListContainer : undefined
+          filteredNews?.length === 0 ? styles.emptyListContainer : undefined
         }
       />
     </View>
