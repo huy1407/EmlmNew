@@ -166,7 +166,7 @@ export default function NewsListScreen({
         renderItem={({ item }) => (
           <ListItemRow
             title={item.title}
-            subtitle={formatDate(item.publishedAt)}
+            subtitle={formatDate(item.modify)}
             onPress={() =>
               onNavigate({ name: "news-detail", params: { id: item.id } })
             }
