@@ -76,6 +76,22 @@ export async function fetchCaseStudies() {
  * Fetch news list from VCCA SOAP API
  * @returns {Promise<Array>} Array of news items
  */
+export const xmlStringToList=(xml) =>{
+  // 1) Lấy nội dung bên trong thẻ <string ...>...</string>
+  // (dùng regex gọn nhẹ; nếu chạy trong browser có thể dùng DOMParser – xem bên dưới)
+  const match = xml.match(/<string\b[^>]*>([\s\S]*?)<\/string>/i);
+  if (!match) throw new Error("Không tìm thấy thẻ <string> trong XML.");
+  // Nội dung văn bản bên trong <string>...</string>
+  let inner = match[1].trim();
+
+  // 2) Nếu chưa phải là JSON array, bọc thêm [ ... ]
+  if (!inner.startsWith("[") || !inner.endsWith("]")) {
+    inner = `[${inner}]`;
+  }
+
+  // 3) Parse JSON -> trả về mảng object
+  return JSON.parse(inner);
+}
 export const getListNews = () =>
   new Promise((resolve, reject) => {
     const xmls = `<?xml version="1.0" encoding="utf-8"?>
@@ -93,40 +109,8 @@ export const getListNews = () =>
       })
       .then((response) => {
         const xmlText = response.data;
-        // Parse SOAP XML response
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-
-        // Extract the result element
-        const resultElement = xmlDoc.querySelector("VccaListTin1Result");
-        if (!resultElement) {
-          console.warn("No VccaListTin1Result found in SOAP response");
-          resolve([]);
-          return;
-        }
-
-        const resultText = resultElement.textContent || "";
-        let newsArray = [];
-
-        if (resultText) {
-          try {
-            // Parse JSON response
-            newsArray = JSON.parse(resultText);
-            // Ensure it's an array
-            if (!Array.isArray(newsArray)) {
-              newsArray = [newsArray];
-            }
-          } catch (e) {
-            console.error("Failed to parse news JSON:", e);
-            resolve([]);
-            return;
-          }
-        }
-
-        // Transform to NewsItem format
-        const formattedNews = newsArray.map((item, index) =>
-          parseNewsItem(item, index)
-        );
+        console.log( xmlStringToList(response.data))
+        const formattedNews =xmlStringToList(response.data);
         resolve(formattedNews);
       })
       .catch((error) => {
