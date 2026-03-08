@@ -1,30 +1,43 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Pressable, Linking, StyleSheet, Alert, ActivityIndicator, Image } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  Linking,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  Image,
+  Dimensions
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DisclaimerBanner from "../components/DisclaimerBanner";
 import { formatDate, shareWithDisclaimer } from "../utils";
 import { getNewsDetail } from "../api/client";
 import type { NewsItem } from "../types";
 import { theme } from "../styles/theme";
-
+import RenderHTML from "react-native-render-html";
+var DomParser = require('react-native-html-parser').DOMParser
 interface NewsDetailScreenProps {
   item: NewsItem | undefined;
   onBack: () => void;
   onViewDetail?: () => void;
 }
 
-export default function NewsDetailScreen({ item, onViewDetail }: NewsDetailScreenProps) {
-  const [newsDetail, setNewsDetail] = useState<NewsItem | null>(item || null);
+export default function NewsDetailScreen({ id, onViewDetail }: NewsDetailScreenProps) {
+  const [newsDetail, setNewsDetail] = useState<NewsItem | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     onViewDetail?.();
-    
+
     // If we have the item ID but not full content, fetch the details
-    if (item?.id && (!item.content || item.content.length < 100)) {
-      loadNewsDetail(item.id);
+    console.log(id)
+    if (id ) {
+      loadNewsDetail(id);
     }
-  }, [item?.id, onViewDetail]);
+  }, [id, onViewDetail]);
 
   const loadNewsDetail = async (id: string) => {
     setIsLoading(true);
@@ -72,7 +85,10 @@ export default function NewsDetailScreen({ item, onViewDetail }: NewsDetailScree
   };
 
   const displayImage = newsDetail.files_url || newsDetail.imageUrl;
-
+  const getEscapedContent = (content) => {
+    let doc = new DomParser().parseFromString(`<!DOCTYPE html><html><head></head><body>${content}</body></html>`,'text/html')
+    return doc.documentElement.textContent
+  }
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <DisclaimerBanner />
@@ -81,7 +97,7 @@ export default function NewsDetailScreen({ item, onViewDetail }: NewsDetailScree
           <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       )}
-      
+
       {/* Title */}
       <Text style={styles.title}>{newsDetail.title}</Text>
 
@@ -93,7 +109,7 @@ export default function NewsDetailScreen({ item, onViewDetail }: NewsDetailScree
             <Text style={styles.metaText}>{newsDetail.category_ids}</Text>
           </View>
         )}
-        
+
         <View style={styles.metaRow}>
           <Ionicons name="time-outline" size={16} color={theme.colors.primary} />
           <Text style={styles.metaText}>{formatDate(newsDetail.modify || newsDetail.publishedAt)}</Text>
@@ -110,14 +126,24 @@ export default function NewsDetailScreen({ item, onViewDetail }: NewsDetailScree
       )}
 
       {/* Summary */}
-      {newsDetail.summary && (
-        <Text style={styles.summary}>{newsDetail.summary}</Text>
-      )}
+      {/*{newsDetail.summary && (*/}
+      {/*  <Text style={styles.summary}>{newsDetail.summary}</Text>*/}
+      {/*)}*/}
 
       {/* Content */}
       {newsDetail.content && (
         <>
-          <Text style={styles.contentLabel}>Nội dung:</Text>
+          {/*<Text style={styles.contentLabel}>Nội dung:</Text>*/}
+          <RenderHTML
+              source={{html:getEscapedContent(newsDetail.content)}}
+              contentWidth={Dimensions.get("window").width - 20}
+              baseStyle={{
+                fontSize: 18,
+                fontFamily: 'SegoeUI',
+                color: 'black',
+                fontWeight:'normal'
+              }}
+          />
           <Text style={styles.contentText}>{newsDetail.content}</Text>
         </>
       )}
@@ -140,13 +166,13 @@ export default function NewsDetailScreen({ item, onViewDetail }: NewsDetailScree
 }
 
 const styles = StyleSheet.create({
-  container: { 
+  container: {
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  content: { 
-    padding: 16, 
-    paddingBottom: 32 
+  content: {
+    padding: 16,
+    paddingBottom: 32
   },
   title: {
     fontSize: 22,
@@ -158,8 +184,6 @@ const styles = StyleSheet.create({
   metaContainer: {
     marginBottom: 16,
     paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.muted,
   },
   metaRow: {
     flexDirection: "row",
@@ -198,9 +222,9 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 24,
   },
-  actions: { 
-    flexDirection: "row", 
-    gap: 12, 
+  actions: {
+    flexDirection: "row",
+    gap: 12,
     flexWrap: "wrap",
     marginTop: 8,
   },
@@ -218,9 +242,9 @@ const styles = StyleSheet.create({
   btnIcon: {
     marginRight: 8,
   },
-  btnText: { 
-    fontSize: 14, 
-    fontWeight: "600", 
+  btnText: {
+    fontSize: 14,
+    fontWeight: "600",
     color: "#fff",
   },
   loadingContainer: {

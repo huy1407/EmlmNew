@@ -263,11 +263,13 @@ export default function App() {
           />
         );
       case "news-detail": {
+
         const id = (currentRoute.params?.id as string) || "";
+        console.log("Current route params:", id)
         const newsItem = NEWS_ITEMS.find((n) => n.id === id);
         return (
           <NewsDetailScreen
-            item={newsItem}
+              id={id}
             onBack={back}
             onViewDetail={() => newsItem && addRecentlyViewed("news", newsItem.id, newsItem.title)}
           />

@@ -113,7 +113,6 @@ export const getListNews = () =>
       })
       .then((response) => {
         const xmlText = response.data;
-        console.log( xmlStringToList(response.data))
         const formattedNews =xmlStringToList(response.data);
         resolve(formattedNews);
       })
@@ -148,31 +147,9 @@ export const getNewsDetail = (sId) =>
       })
       .then((response) => {
         const xmlText = response.data;
-        // Parse SOAP XML response
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-
-        const resultElement = xmlDoc.querySelector("VccaTinResult");
-        if (!resultElement) {
-          console.warn("No VccaTinResult found in SOAP response");
-          resolve(null);
-          return;
-        }
-
-        const resultText = resultElement.textContent || "";
-        if (!resultText) {
-          resolve(null);
-          return;
-        }
-
-        try {
-          const item = JSON.parse(resultText);
-          const formattedNews = parseNewsItem(item, 0);
-          resolve(formattedNews);
-        } catch (e) {
-          console.error("Failed to parse news detail JSON:", e);
-          reject(e);
-        }
+        const formattedNews =xmlStringToList(response.data)[0];
+        console.log(formattedNews)
+        resolve(formattedNews);
       })
       .catch((error) => {
         console.error("Error fetching news detail:", error);
