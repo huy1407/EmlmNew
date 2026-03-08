@@ -8,8 +8,10 @@ import {
   Image,
   StyleSheet,
   RefreshControl,
+  ScrollView,
 } from "react-native";
 import ListItemRow from "../components/ListItemRow";
+import SkeletonLoader from "../components/SkeletonLoader";
 import DisclaimerBanner from "../components/DisclaimerBanner";
 import SectionHeader from "../components/SectionHeader";
 import { formatDate } from "../utils";
@@ -151,7 +153,23 @@ export default function NewsListScreen({
     return (
       <View style={{ flex: 1 }}>
         <DisclaimerBanner />
-        {renderLoadingState()}
+        <ScrollView
+          style={{ flex: 1 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={handleRefresh}
+              tintColor={theme.colors.primary}
+            />
+          }
+        >
+          <View style={styles.headerContainer}>
+            <View style={styles.headerTitleContainer}>
+              <SectionHeader title="Tin tức" />
+            </View>
+          </View>
+          <SkeletonLoader count={8} />
+        </ScrollView>
       </View>
     );
   }
@@ -174,6 +192,14 @@ export default function NewsListScreen({
           />
         )}
         ListEmptyComponent={renderEmptyState}
+        ListFooterComponent={isLoading && news && news.length > 0 ? () => (
+          <View style={styles.footerLoadingContainer}>
+            <ActivityIndicator
+              size="small"
+              color={theme.colors.primary}
+            />
+          </View>
+        ) : null}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
@@ -246,6 +272,11 @@ const styles = StyleSheet.create({
   },
   emptyListContainer: {
     flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  footerLoadingContainer: {
+    paddingVertical: 16,
     justifyContent: "center",
     alignItems: "center",
   },
