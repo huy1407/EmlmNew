@@ -47,14 +47,13 @@ export default function CompanyMLMListScreen({
       const data = await fetchMLMCompanies();
       console.log("[v0] Loaded companies:", data);
       
-      // Parse company data from API response
+      // Data from API comes with fields: ten, sodangkydoanhnghiep, sodangkyhoatdong
       const parsed = Array.isArray(data)
         ? data.map((item, index) => ({
-            id: item.sId || item.id || `company-${index}`,
-            name: item.sTenCoPhieu || item.ten_cong_ty || item.name || "Unnamed",
-            registrationNumber: item.sGCNDKDNDTSo || item.gcn_dky_doanh_nghiep || item.registrationNumber,
-            businessLicenseNumber: item.sGCNHoatDongBHDCSo || item.gcn_hoat_dong_bhdc || item.businessLicenseNumber,
-            status: item.sStatus || item.status,
+            id: item.id || `company-${index}`,
+            ten: item.ten || "Unnamed",
+            sodangkydoanhnghiep: item.sodangkydoanhnghiep,
+            sodangkyhoatdong: item.sodangkyhoatdong,
           }))
         : [];
       
@@ -79,11 +78,11 @@ export default function CompanyMLMListScreen({
     } else {
       const filtered = companies.filter(
         (company) =>
-          company.name.toLowerCase().includes(query.toLowerCase()) ||
-          (company.registrationNumber &&
-            company.registrationNumber.toLowerCase().includes(query.toLowerCase())) ||
-          (company.businessLicenseNumber &&
-            company.businessLicenseNumber.toLowerCase().includes(query.toLowerCase()))
+          company.ten.toLowerCase().includes(query.toLowerCase()) ||
+          (company.sodangkydoanhnghiep &&
+            company.sodangkydoanhnghiep.toLowerCase().includes(query.toLowerCase())) ||
+          (company.sodangkyhoatdong &&
+            company.sodangkyhoatdong.toLowerCase().includes(query.toLowerCase()))
       );
       setFilteredCompanies(filtered);
     }
@@ -172,9 +171,7 @@ export default function CompanyMLMListScreen({
         ListHeaderComponent={renderHeader}
         renderItem={({ item }) => (
           <CompanyMLMItem
-            name={item.name}
-            registrationNumber={item.registrationNumber}
-            businessLicenseNumber={item.businessLicenseNumber}
+            item={item}
             onPress={() => {
               // Can be extended to navigate to detail screen
             }}

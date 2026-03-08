@@ -1,19 +1,16 @@
 import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import type { CompanyMLM } from "../types";
 import { theme } from "../styles/theme";
 
 interface CompanyMLMItemProps {
-  name: string;
-  registrationNumber?: string;
-  businessLicenseNumber?: string;
+  item: CompanyMLM;
   onPress?: () => void;
 }
 
 export default function CompanyMLMItem({
-  name,
-  registrationNumber,
-  businessLicenseNumber,
+  item,
   onPress,
 }: CompanyMLMItemProps) {
   return (
@@ -31,12 +28,12 @@ export default function CompanyMLMItem({
             style={styles.icon}
           />
           <Text style={styles.name} numberOfLines={2}>
-            {name}
+            {item.ten}
           </Text>
         </View>
 
         {/* Registration Number */}
-        {registrationNumber && (
+        {item.sodangkydoanhnghiep && (
           <View style={styles.infoRow}>
             <Ionicons
               name="document-text"
@@ -46,13 +43,13 @@ export default function CompanyMLMItem({
             />
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>GCN đăng ký doanh nghiệp/Đầu tư số:</Text>
-              <Text style={styles.infoText}>{registrationNumber}</Text>
+              <Text style={styles.infoText}>{item.sodangkydoanhnghiep}</Text>
             </View>
           </View>
         )}
 
         {/* Business License Number */}
-        {businessLicenseNumber && (
+        {item.sodangkyhoatdong && (
           <View style={styles.infoRow}>
             <Ionicons
               name="document-text"
@@ -62,7 +59,7 @@ export default function CompanyMLMItem({
             />
             <View style={styles.infoContent}>
               <Text style={styles.infoLabel}>GCN đăng ký hoạt động BHDC:</Text>
-              <Text style={styles.infoText}>{businessLicenseNumber}</Text>
+              <Text style={styles.infoText}>{item.sodangkyhoatdong}</Text>
             </View>
           </View>
         )}
