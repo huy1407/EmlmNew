@@ -48,6 +48,8 @@ function parseNewsItem(item, index = 0) {
     publishedAt: item.dNgayTao || item.ngay_tao || item.publishedAt || new Date().toISOString(),
     imageUrl: item.sHinhDaiDien || item.hinh_dai_dien || item.sHinh || item.hinh || item.imageUrl || undefined,
     modify: item.dNgayCapNhat || item.ngay_cap_nhat || item.modify || item.dNgayTao || item.ngay_tao || undefined,
+    category_ids: item.category_ids || item.danh_muc || item.category || undefined,
+    files_url: item.files_url || item.sHinhDaiDien || item.hinh_dai_dien || undefined,
   };
 }
 

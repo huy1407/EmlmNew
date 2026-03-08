@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, Pressable, Linking, StyleSheet, Alert, ActivityIndicator, Image } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import DisclaimerBanner from "../components/DisclaimerBanner";
 import { formatDate, shareWithDisclaimer } from "../utils";
 import { getNewsDetail } from "../api/client";
@@ -70,6 +71,8 @@ export default function NewsDetailScreen({ item, onViewDetail }: NewsDetailScree
     shareWithDisclaimer(newsDetail.title, newsDetail.summary, newsDetail.sourceUrl);
   };
 
+  const displayImage = newsDetail.files_url || newsDetail.imageUrl;
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <DisclaimerBanner />
@@ -78,17 +81,40 @@ export default function NewsDetailScreen({ item, onViewDetail }: NewsDetailScree
           <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       )}
+      
+      {/* Title */}
       <Text style={styles.title}>{newsDetail.title}</Text>
-      <Text style={styles.meta}>{formatDate(newsDetail.publishedAt)}</Text>
-      {newsDetail.imageUrl && (
+
+      {/* Meta Info - Category and Date */}
+      <View style={styles.metaContainer}>
+        {newsDetail.category_ids && (
+          <View style={styles.metaRow}>
+            <Ionicons name="folder-outline" size={16} color={theme.colors.primary} />
+            <Text style={styles.metaText}>{newsDetail.category_ids}</Text>
+          </View>
+        )}
+        
+        <View style={styles.metaRow}>
+          <Ionicons name="time-outline" size={16} color={theme.colors.primary} />
+          <Text style={styles.metaText}>{formatDate(newsDetail.modify || newsDetail.publishedAt)}</Text>
+        </View>
+      </View>
+
+      {/* Image */}
+      {displayImage && (
         <Image
-          source={{ uri: newsDetail.imageUrl }}
+          source={{ uri: displayImage }}
           style={styles.detailImage}
+          onError={(e) => console.log("[v0] Image failed to load:", e.nativeEvent.error)}
         />
       )}
-      <Text style={styles.summary}>{newsDetail.summary}</Text>
 
-      {/* Full content displayed natively */}
+      {/* Summary */}
+      {newsDetail.summary && (
+        <Text style={styles.summary}>{newsDetail.summary}</Text>
+      )}
+
+      {/* Content */}
       {newsDetail.content && (
         <>
           <Text style={styles.contentLabel}>Nội dung:</Text>
@@ -96,14 +122,16 @@ export default function NewsDetailScreen({ item, onViewDetail }: NewsDetailScree
         </>
       )}
 
-      {/* Actions */}
+      {/* Action Buttons */}
       <View style={styles.actions}>
         {newsDetail.sourceUrl && (
           <Pressable style={styles.btn} onPress={handleOpenSource}>
+            <Ionicons name="open-outline" size={16} color="#fff" style={styles.btnIcon} />
             <Text style={styles.btnText}>Mở tài liệu tham khảo</Text>
           </Pressable>
         )}
         <Pressable style={styles.btn} onPress={handleShare}>
+          <Ionicons name="share-social-outline" size={16} color="#fff" style={styles.btnIcon} />
           <Text style={styles.btnText}>Chia sẻ</Text>
         </Pressable>
       </View>
@@ -112,27 +140,51 @@ export default function NewsDetailScreen({ item, onViewDetail }: NewsDetailScree
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { padding: 16, paddingBottom: 32 },
+  container: { 
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  content: { 
+    padding: 16, 
+    paddingBottom: 32 
+  },
   title: {
     fontSize: 22,
     fontWeight: "700",
     color: theme.colors.text,
+    marginBottom: 12,
+    lineHeight: 28,
+  },
+  metaContainer: {
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.muted,
+  },
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 8,
   },
-  meta: { fontSize: 14, color: theme.colors.muted, marginBottom: 12 },
+  metaText: {
+    fontSize: 14,
+    color: theme.colors.muted,
+    marginLeft: 8,
+    fontWeight: "500",
+  },
   detailImage: {
     width: "100%",
-    height: 200,
+    height: 220,
     borderRadius: 8,
     marginBottom: 16,
     backgroundColor: theme.colors.muted,
   },
   summary: {
     fontSize: 16,
-    color: theme.colors.muted,
+    color: theme.colors.text,
     lineHeight: 24,
     marginBottom: 16,
+    fontWeight: "500",
   },
   contentLabel: {
     fontSize: 15,
@@ -146,14 +198,31 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 24,
   },
-  actions: { flexDirection: "row", gap: 12, flexWrap: "wrap" },
+  actions: { 
+    flexDirection: "row", 
+    gap: 12, 
+    flexWrap: "wrap",
+    marginTop: 8,
+  },
   btn: {
-    paddingVertical: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
     backgroundColor: theme.colors.primary,
+    flex: 1,
+    minWidth: 140,
+    justifyContent: "center",
   },
-  btnText: { fontSize: 14, fontWeight: "600", color: "#fff" },
+  btnIcon: {
+    marginRight: 8,
+  },
+  btnText: { 
+    fontSize: 14, 
+    fontWeight: "600", 
+    color: "#fff",
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
