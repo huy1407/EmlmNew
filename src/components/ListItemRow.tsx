@@ -24,11 +24,11 @@ export default function ListItemRow({
         <Image
           source={{ uri: imageUrl }}
           style={styles.image}
-          defaultSource={require("../assets/placeholder.png")}
+          // defaultSource={require("../assets/placeholder.png")}
         />
       )}
       <View style={styles.content}>
-        <Text style={styles.title} numberOfLines={2}>
+        <Text style={styles.title} numberOfLines={5}>
           {title}
         </Text>
         {subtitle ? (
@@ -37,7 +37,7 @@ export default function ListItemRow({
           </Text>
         ) : null}
       </View>
-      <Text style={styles.arrow}>›</Text>
+      {/*<Text style={styles.arrow}>›</Text>*/}
     </Pressable>
   );
 }
