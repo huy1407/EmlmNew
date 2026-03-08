@@ -1,5 +1,6 @@
-import { API_BASE_URL } from "./config";
+import { API_BASE_URL, BASE_API_URL_VCCA } from "./config";
 
+// Standard REST API request function
 async function request(path, options = {}) {
   const url = API_BASE_URL + path;
   const res = await fetch(url, {
@@ -20,6 +21,54 @@ async function request(path, options = {}) {
     throw new Error(msg);
   }
   return data;
+}
+
+// SOAP API request function for VCCA endpoints
+async function soapRequest(endpoint, soapBody, soapAction) {
+  try {
+    const response = await fetch(BASE_API_URL_VCCA + endpoint, {
+      method: "POST",
+      headers: {
+        "SOAPAction": soapAction,
+        "Content-Type": "text/xml; charset=utf-8",
+      },
+      body: soapBody,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const xmlText = await response.text();
+
+    // Parse SOAP XML response
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+
+    // Check for SOAP fault
+    const fault = xmlDoc.querySelector("soap\\:Fault, Fault");
+    if (fault) {
+      const faultString = fault.querySelector("faultstring")?.textContent || "SOAP Fault";
+      throw new Error(faultString);
+    }
+
+    return xmlDoc;
+  } catch (error) {
+    console.error("SOAP request error:", error);
+    throw error;
+  }
+}
+
+// Parse news item from response data
+function parseNewsItem(item, index = 0) {
+  return {
+    id: item.sId || item.id || `news-${index}`,
+    title: item.sTieuDe || item.tieu_de || item.title || "Untitled",
+    summary: item.sTomTat || item.tom_tat || item.summary || (item.sNoidung || item.content || "").substring(0, 150),
+    content: item.sNoidung || item.noi_dung || item.content || "",
+    sourceUrl: item.sLuotxem || item.link || undefined,
+    publishedAt: item.dNgayTao || item.ngay_tao || item.publishedAt || new Date().toISOString(),
+  };
 }
 
 export async function fetchCompanies() {
@@ -46,73 +95,112 @@ export async function fetchCaseStudies() {
 }
 
 /**
- * Fetch news from VCCA SOAP API
- * Parses SOAP XML response and returns formatted news items
+ * Fetch news list from VCCA SOAP API
+ * @returns {Promise<Array>} Array of news items
  */
-export async function fetchNews() {
-  const SOAP_URL = "https://www.emlm.top";
-  const soapBody = `<?xml version="1.0" encoding="utf-8"?>
+export async function getListNews() {
+  return new Promise((resolve, reject) => {
+    const soapBody = `<?xml version="1.0" encoding="utf-8"?>
     <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Body>
         <VccaListTin1 xmlns="http://tempuri.org/" />
       </soap:Body>
     </soap:Envelope>`;
 
-  try {
-    const response = await fetch(SOAP_URL + "/VccaListTin1", {
-      method: "POST",
-      headers: {
-        "SOAPAction": "http://tempuri.org/VccaListTin1",
-        "Content-Type": "text/xml; charset=utf-8",
-      },
-      body: soapBody,
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    const xmlText = await response.text();
-
-    // Parse SOAP XML response
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-
-    // Extract the result string from SOAP response
-    const resultElement = xmlDoc.querySelector("VccaListTin1Result");
-    if (!resultElement) {
-      console.warn("No VccaListTin1Result found in SOAP response");
-      return [];
-    }
-
-    const resultText = resultElement.textContent || "";
-
-    // Parse JSON array from result
-    let newsArray = [];
-    if (resultText) {
-      try {
-        // Try to parse as JSON directly
-        if (resultText.startsWith("[")) {
-          newsArray = JSON.parse(resultText);
-        } else {
-          // Wrap in array if needed
-          newsArray = JSON.parse(`[${resultText}]`);
+    soapRequest("/VccaListTin1", soapBody, "http://tempuri.org/VccaListTin1")
+      .then((xmlDoc) => {
+        // Extract the result element
+        const resultElement = xmlDoc.querySelector("VccaListTin1Result");
+        if (!resultElement) {
+          console.warn("No VccaListTin1Result found in SOAP response");
+          resolve([]);
+          return;
         }
-      } catch (e) {
-        console.error("Failed to parse news JSON:", e);
-        return [];
-      }
-    }
 
-    // Transform API response to NewsItem format
-    return newsArray.map((item, index) => ({
-      id: item.id || `news-${index}`,
-      title: item.title || item.tieu_de || "Untitled",
-      summary: item.summary || item.tom_tat || (item.content || "").substring(0, 150),
-      content: item.content || item.noi_dung || "",
-      sourceUrl: item.sourceUrl || item.link || undefined,
-      publishedAt: item.publishedAt || item.ngay_tao || new Date().toISOString(),
-    }));
+        const resultText = resultElement.textContent || "";
+        let newsArray = [];
+
+        if (resultText) {
+          try {
+            // Parse JSON response
+            newsArray = JSON.parse(resultText);
+            // Ensure it's an array
+            if (!Array.isArray(newsArray)) {
+              newsArray = [newsArray];
+            }
+          } catch (e) {
+            console.error("Failed to parse news JSON:", e);
+            resolve([]);
+            return;
+          }
+        }
+
+        // Transform to NewsItem format
+        const formattedNews = newsArray.map((item, index) => parseNewsItem(item, index));
+        resolve(formattedNews);
+      })
+      .catch((error) => {
+        console.error("Error fetching news list:", error);
+        reject(error);
+      });
+  });
+}
+
+/**
+ * Fetch detailed news by ID from VCCA SOAP API
+ * @param {string} sId - News ID
+ * @returns {Promise<Object>} News item details
+ */
+export async function getNewsDetail(sId) {
+  return new Promise((resolve, reject) => {
+    const soapBody = `<?xml version="1.0" encoding="utf-8"?>
+    <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+      <soap:Body>
+        <VccaTin xmlns="http://tempuri.org/">
+          <sId>${sId}</sId>
+        </VccaTin>
+      </soap:Body>
+    </soap:Envelope>`;
+
+    soapRequest(`/VccaTin?sId=${sId}`, soapBody, "http://tempuri.org/VccaTin")
+      .then((xmlDoc) => {
+        const resultElement = xmlDoc.querySelector("VccaTinResult");
+        if (!resultElement) {
+          console.warn("No VccaTinResult found in SOAP response");
+          resolve(null);
+          return;
+        }
+
+        const resultText = resultElement.textContent || "";
+        if (!resultText) {
+          resolve(null);
+          return;
+        }
+
+        try {
+          const item = JSON.parse(resultText);
+          const formattedNews = parseNewsItem(item, 0);
+          resolve(formattedNews);
+        } catch (e) {
+          console.error("Failed to parse news detail JSON:", e);
+          reject(e);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching news detail:", error);
+        reject(error);
+      });
+  });
+}
+
+/**
+ * Fetch news list (wrapper for getListNews with error handling)
+ * @returns {Promise<Array>} Array of news items, empty array on error
+ */
+export async function fetchNews() {
+  try {
+    const news = await getListNews();
+    return news || [];
   } catch (error) {
     console.error("Error fetching news from VCCA API:", error);
     return [];
