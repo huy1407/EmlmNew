@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Pressable, Linking, StyleSheet, Alert, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, Pressable, Linking, StyleSheet, Alert, ActivityIndicator, Image } from "react-native";
 import DisclaimerBanner from "../components/DisclaimerBanner";
 import { formatDate, shareWithDisclaimer } from "../utils";
 import { getNewsDetail } from "../api/client";
@@ -80,6 +80,12 @@ export default function NewsDetailScreen({ item, onViewDetail }: NewsDetailScree
       )}
       <Text style={styles.title}>{newsDetail.title}</Text>
       <Text style={styles.meta}>{formatDate(newsDetail.publishedAt)}</Text>
+      {newsDetail.imageUrl && (
+        <Image
+          source={{ uri: newsDetail.imageUrl }}
+          style={styles.detailImage}
+        />
+      )}
       <Text style={styles.summary}>{newsDetail.summary}</Text>
 
       {/* Full content displayed natively */}
@@ -115,6 +121,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   meta: { fontSize: 14, color: theme.colors.muted, marginBottom: 12 },
+  detailImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 8,
+    marginBottom: 16,
+    backgroundColor: theme.colors.muted,
+  },
   summary: {
     fontSize: 16,
     color: theme.colors.muted,

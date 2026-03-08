@@ -167,6 +167,7 @@ export default function NewsListScreen({
           <ListItemRow
             title={item.title}
             subtitle={formatDate(item.modify)}
+            imageUrl={item.imageUrl}
             onPress={() =>
               onNavigate({ name: "news-detail", params: { id: item.id } })
             }

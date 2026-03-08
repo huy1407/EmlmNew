@@ -1,16 +1,18 @@
 import React from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet, Image } from "react-native";
 import { theme } from "../styles/theme";
 
 interface ListItemRowProps {
   title: string;
   subtitle?: string;
+  imageUrl?: string;
   onPress: () => void;
 }
 
 export default function ListItemRow({
   title,
   subtitle,
+  imageUrl,
   onPress,
 }: ListItemRowProps) {
   return (
@@ -18,6 +20,13 @@ export default function ListItemRow({
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
       onPress={onPress}
     >
+      {imageUrl && (
+        <Image
+          source={{ uri: imageUrl }}
+          style={styles.image}
+          defaultSource={require("../assets/placeholder.png")}
+        />
+      )}
       <View style={styles.content}>
         <Text style={styles.title} numberOfLines={2}>
           {title}
@@ -38,7 +47,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: theme.colors.card,
-    padding: 16,
+    padding: 12,
     marginHorizontal: 16,
     marginVertical: 4,
     borderRadius: theme.radius.md,
@@ -46,6 +55,13 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.85,
+  },
+  image: {
+    width: 60,
+    height: 60,
+    borderRadius: theme.radius.md,
+    marginRight: 12,
+    backgroundColor: theme.colors.muted,
   },
   content: {
     flex: 1,
