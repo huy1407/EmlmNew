@@ -170,3 +170,52 @@ export async function fetchNews() {
     return [];
   }
 }
+
+/**
+ * Fetch multi-level marketing companies from VCCA SOAP API
+ * @returns {Promise<Array>} Array of MLM companies
+ */
+export const getListCompany = () =>
+  new Promise((resolve, reject) => {
+    let xmls = `<?xml version="1.0" encoding="utf-8"?>
+    <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+        <VccaListDNBHDC xmlns="http://tempuri.org/" />
+    </soap:Body>
+    </soap:Envelope>`;
+    apiRootVCCA
+      .get(BASE_API_URL_VCCA + '/VccaListDNBHDC', xmls, {
+        headers: {
+          SOAPAction: 'http://tempuri.org/VccaListDNBHDC',
+          'Content-Type': 'text/xml; charset=utf-8',
+        },
+      })
+      .then(response => {
+        try {
+          const companies = xmlStringToList(response.data);
+          console.log("[v0] MLM companies fetched:", companies);
+          resolve(companies);
+        } catch (parseError) {
+          console.error("[v0] Error parsing MLM companies:", parseError);
+          reject(parseError);
+        }
+      })
+      .catch(error => {
+        console.error("[v0] Error fetching MLM companies:", error);
+        reject(error);
+      });
+  });
+
+/**
+ * Fetch multi-level marketing companies (wrapper with error handling)
+ * @returns {Promise<Array>} Array of MLM companies, empty array on error
+ */
+export async function fetchMLMCompanies() {
+  try {
+    const companies = await getListCompany();
+    return companies || [];
+  } catch (error) {
+    console.error("[v0] Error fetching MLM companies from VCCA API:", error);
+    return [];
+  }
+}

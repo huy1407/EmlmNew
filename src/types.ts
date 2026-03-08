@@ -63,6 +63,14 @@ export interface NewsItem {
   files_url?: string;
 }
 
+export interface CompanyMLM {
+  id: string;
+  name: string;
+  registrationNumber?: string;
+  businessLicenseNumber?: string;
+  status?: string;
+}
+
 export type BookmarkType =
   | "knowledge"
   | "regulation"
