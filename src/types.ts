@@ -64,11 +64,10 @@ export interface NewsItem {
 }
 
 export interface CompanyMLM {
-  id: string;
-  name: string;
-  registrationNumber?: string;
-  businessLicenseNumber?: string;
-  status?: string;
+  id?: string;
+  ten: string; // Company name
+  sodangkydoanhnghiep?: string; // Registration number
+  sodangkyhoatdong?: string; // Business license number
 }
 
 export type BookmarkType =
