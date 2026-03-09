@@ -359,6 +359,49 @@ export default function CompanyMLMDetailScreen({
       return (
         <View style={styles.loadingContent}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      );
+    }
+
+    if (!hoSoData || hoSoData.length === 0) {
+      return (
+        <Text style={styles.placeholderText}>
+          Không có thông tin hồ sơ cập nhật
+        </Text>
+      );
+    }
+
+    return (
+      <View>
+        {hoSoData.map((item, index) => (
+          <View key={`hoso-${index}`} style={styles.hoSoItem}>
+            {/* Category Name */}
+            <Text style={styles.hoSoCategoryName}>{item.category_name || item.categoryName || "Danh mục"}</Text>
+
+            {/* Profile Name and Files */}
+            <View style={styles.hoSoRow}>
+              <View style={styles.hoSoColumn}>
+                <Text style={styles.hoSoLabel}>Tên hồ sơ</Text>
+                <Text style={styles.hoSoValue}>{item.ten || item.name || "N/A"}</Text>
+              </View>
+              <View style={styles.hoSoColumn}>
+                <Text style={styles.hoSoLabel}>Tệp</Text>
+                <Text style={styles.hoSoValue}>{item.files || item.file || "N/A"}</Text>
+              </View>
+            </View>
+
+            {/* Date Sent */}
+            <View style={styles.hoSoDivider} />
+            <View style={styles.hoSoRow}>
+              <View style={styles.hoSoColumn}>
+                <Text style={styles.hoSoLabel}>Ngày gửi</Text>
+                <Text style={styles.hoSoValue}>{item.ngaygui || item.dateSent || "N/A"}</Text>
+              </View>
+            </View>
+
+            {index < hoSoData.length - 1 && <View style={styles.itemSeparator} />}
+          </View>
+        ))}
       </View>
     );
   };
