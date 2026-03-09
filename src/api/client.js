@@ -319,3 +319,41 @@ export const getCompanyAgency = (sId) =>
         reject(error);
       });
   });
+
+/**
+ * Fetch company owner information (Chủ sở hữu) from VCCA SOAP API
+ * @param {string} sId - Company ID
+ * @returns {Promise<Array>} Array of owner items
+ */
+export const getCompanyOwner = (sId) =>
+  new Promise((resolve, reject) => {
+    let xmls = `<?xml version="1.0" encoding="utf-8"?>
+    <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+    <VccaDNBHDCChusohuu xmlns="http://tempuri.org/">
+        <sId>${sId}</sId>
+    </VccaDNBHDCChusohuu>
+    </soap:Body>
+    </soap:Envelope>`;
+    apiRootVCCA
+      .get(BASE_API_URL_VCCA + '/VccaDNBHDCChusohuu?sId=' + sId, xmls, {
+        headers: {
+          SOAPAction: 'http://tempuri.org/VccaDNBHDCChusohuu',
+          'Content-Type': 'text/xml; charset=utf-8',
+        },
+      })
+      .then(response => {
+        try {
+          const ownerData = xmlStringToList(response.data);
+          console.log("[v0] Company Owner fetched:", ownerData);
+          resolve(ownerData);
+        } catch (parseError) {
+          console.error("[v0] Error parsing company Owner:", parseError);
+          reject(parseError);
+        }
+      })
+      .catch(error => {
+        console.error("[v0] Error fetching company Owner:", error);
+        reject(error);
+      });
+  });

@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DisclaimerBanner from "../components/DisclaimerBanner";
-import { getCompanyDetail, getCompanyHoSo, getCompanyAgency } from "../api/client";
+import { getCompanyDetail, getCompanyHoSo, getCompanyAgency, getCompanyOwner } from "../api/client";
 import type { CompanyMLM } from "../types";
 import { theme } from "../styles/theme";
 
@@ -36,6 +36,8 @@ export default function CompanyMLMDetailScreen({
   const [hoSoLoading, setHoSoLoading] = useState(false);
   const [agencyData, setAgencyData] = useState<any[]>([]);
   const [agencyLoading, setAgencyLoading] = useState(false);
+  const [ownerData, setOwnerData] = useState<any[]>([]);
+  const [ownerLoading, setOwnerLoading] = useState(false);
 
   useEffect(() => {
     if (company?.id) {
@@ -83,6 +85,20 @@ export default function CompanyMLMDetailScreen({
       setAgencyData([]);
     } finally {
       setAgencyLoading(false);
+    }
+  };
+
+  const loadCompanyOwner = async (companyId: string) => {
+    try {
+      setOwnerLoading(true);
+      const data = await getCompanyOwner(companyId);
+      console.log("[v0] Company Owner data:", data);
+      setOwnerData(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("[v0] Error loading company Owner:", err);
+      setOwnerData([]);
+    } finally {
+      setOwnerLoading(false);
     }
   };
 
@@ -315,6 +331,88 @@ export default function CompanyMLMDetailScreen({
     );
   };
 
+  const renderOwnerContent = () => {
+    if (ownerLoading) {
+      return (
+        <View style={styles.loadingContent}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      );
+    }
+
+    if (!ownerData || ownerData.length === 0) {
+      return (
+        <Text style={styles.placeholderText}>
+          Không có thông tin chủ sở hữu
+        </Text>
+      );
+    }
+
+    return (
+      <View>
+        {ownerData.map((item, index) => (
+          <View key={`owner-${index}`} style={styles.ownerItem}>
+            {/* Owner Type Header */}
+            <Text style={styles.ownerCategoryName}>{item.loai || item.type || "Loại chủ sở hữu"}</Text>
+
+            {/* Name and Birth Date */}
+            <View style={styles.ownerRow}>
+              <View style={styles.ownerColumn}>
+                <Text style={styles.ownerLabel}>Tên</Text>
+                <Text style={styles.ownerValue}>{item.ten || item.name || "N/A"}</Text>
+              </View>
+              <View style={styles.ownerColumn}>
+                <Text style={styles.ownerLabel}>Ngày sinh</Text>
+                <Text style={styles.ownerValue}>{item.ngaysinh || item.dateOfBirth || "N/A"}</Text>
+              </View>
+            </View>
+            <View style={styles.ownerDivider} />
+
+            {/* ID and Issue Date */}
+            <View style={styles.ownerRow}>
+              <View style={styles.ownerColumn}>
+                <Text style={styles.ownerLabel}>CMND</Text>
+                <Text style={styles.ownerValue}>{item.cmnd || item.id || "N/A"}</Text>
+              </View>
+              <View style={styles.ownerColumn}>
+                <Text style={styles.ownerLabel}>Ngày cấp</Text>
+                <Text style={styles.ownerValue}>{item.ngaycap || item.issueDate || "N/A"}</Text>
+              </View>
+            </View>
+            <View style={styles.ownerDivider} />
+
+            {/* Business Registration and Modification Date */}
+            <View style={styles.ownerRow}>
+              <View style={styles.ownerColumn}>
+                <Text style={styles.ownerLabel}>Số đăng ký doanh nghiệp</Text>
+                <Text style={styles.ownerValue}>{item.sodangkydoanhnghiep || item.businessRegNumber || "N/A"}</Text>
+              </View>
+              <View style={styles.ownerColumn}>
+                <Text style={styles.ownerLabel}>Ngày sửa đổi</Text>
+                <Text style={styles.ownerValue}>{item.ngaysuadoi1 || item.modificationDate || "N/A"}</Text>
+              </View>
+            </View>
+            <View style={styles.ownerDivider} />
+
+            {/* Issue Date and Status */}
+            <View style={styles.ownerRow}>
+              <View style={styles.ownerColumn}>
+                <Text style={styles.ownerLabel}>Ngày cấp</Text>
+                <Text style={styles.ownerValue}>{item.ngaycap1 || item.issueDateBusiness || "N/A"}</Text>
+              </View>
+              <View style={styles.ownerColumn}>
+                <Text style={styles.ownerLabel}>Tình trạng</Text>
+                <Text style={styles.ownerValue}>{item.option || item.status || "N/A"}</Text>
+              </View>
+            </View>
+
+            {index < ownerData.length - 1 && <View style={styles.itemSeparator} />}
+          </View>
+        ))}
+      </View>
+    );
+  };
+
   if (!company) {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -407,6 +505,11 @@ export default function CompanyMLMDetailScreen({
                 if (newSection === "truSoChiNhanh" && company?.id && agencyData.length === 0) {
                   loadCompanyAgency(company.id);
                 }
+
+                // Load Owner data when expanding that section
+                if (newSection === "chuSoHuu" && company?.id && ownerData.length === 0) {
+                  loadCompanyOwner(company.id);
+                }
               }}
             >
               <Text style={styles.sectionTitle}>{section.title}</Text>
@@ -439,7 +542,13 @@ export default function CompanyMLMDetailScreen({
               </View>
             )}
 
-            {expandedSection === section.id && section.id !== "hoSoChung" && section.id !== "hoSoCapNhat" && section.id !== "truSoChiNhanh" && (
+            {expandedSection === section.id && section.id === "chuSoHuu" && (
+              <View style={styles.sectionContent}>
+                {renderOwnerContent()}
+              </View>
+            )}
+
+            {expandedSection === section.id && section.id !== "hoSoChung" && section.id !== "hoSoCapNhat" && section.id !== "truSoChiNhanh" && section.id !== "chuSoHuu" && (
               <View style={styles.sectionContent}>
                 <Text style={styles.placeholderText}>
                   Thông tin sẽ được cập nhật
@@ -734,6 +843,45 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   agencyDivider: {
+    height: 1,
+    backgroundColor: theme.colors.border,
+    marginVertical: 8,
+    marginHorizontal: 4,
+  },
+
+  // Owner Information Styles
+  ownerItem: {
+    paddingVertical: 12,
+    backgroundColor: "#fafafa",
+  },
+  ownerCategoryName: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: theme.colors.text,
+    marginBottom: 12,
+    paddingHorizontal: 4,
+  },
+  ownerRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 8,
+  },
+  ownerColumn: {
+    flex: 1,
+  },
+  ownerLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: theme.colors.muted,
+    marginBottom: 4,
+  },
+  ownerValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.text,
+    lineHeight: 20,
+  },
+  ownerDivider: {
     height: 1,
     backgroundColor: theme.colors.border,
     marginVertical: 8,
