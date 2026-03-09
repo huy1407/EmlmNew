@@ -8,10 +8,12 @@ import {
   Image,
   ActivityIndicator,
   Pressable,
+  TextInput,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DisclaimerBanner from "../components/DisclaimerBanner";
-import { getCompanyDetail, getCompanyHoSo, getCompanyAgency, getCompanyOwner, getCompanyComplaints } from "../api/client";
+import { getCompanyDetail, getCompanyHoSo, getCompanyAgency, getCompanyOwner, getCompanyComplaints, submitComplaint } from "../api/client";
 import type { CompanyMLM } from "../types";
 import { theme } from "../styles/theme";
 
@@ -40,6 +42,11 @@ export default function CompanyMLMDetailScreen({
   const [ownerLoading, setOwnerLoading] = useState(false);
   const [complaintData, setComplaintData] = useState<any[]>([]);
   const [complaintLoading, setComplaintLoading] = useState(false);
+  const [complaintFormName, setComplaintFormName] = useState("");
+  const [complaintFormEmail, setComplaintFormEmail] = useState("");
+  const [complaintFormContent, setComplaintFormContent] = useState("");
+  const [complaintSubmitting, setComplaintSubmitting] = useState(false);
+  const [complaintSubmitError, setComplaintSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     if (company?.id) {
@@ -115,6 +122,41 @@ export default function CompanyMLMDetailScreen({
       setComplaintData([]);
     } finally {
       setComplaintLoading(false);
+    }
+  };
+
+  const handleSubmitComplaint = async () => {
+    // Validate form
+    if (!complaintFormName.trim()) {
+      Alert.alert("Lỗi", "Vui lòng nhập tên của bạn");
+      return;
+    }
+    if (!complaintFormEmail.trim() || !complaintFormEmail.includes("@")) {
+      Alert.alert("Lỗi", "Vui lòng nhập email hợp lệ");
+      return;
+    }
+    if (!complaintFormContent.trim()) {
+      Alert.alert("Lỗi", "Vui lòng nhập nội dung khiếu nại");
+      return;
+    }
+
+    try {
+      setComplaintSubmitting(true);
+      setComplaintSubmitError(null);
+      await submitComplaint(company?.id || "", complaintFormName, complaintFormEmail, complaintFormContent);
+      
+      // Success - show alert and clear form
+      Alert.alert("Thành công", "Khiếu nại của bạn đã được gửi. Cảm ơn bạn đã phản hồi!");
+      setComplaintFormName("");
+      setComplaintFormEmail("");
+      setComplaintFormContent("");
+    } catch (err) {
+      console.error("[v0] Error submitting complaint:", err);
+      const errorMsg = err instanceof Error ? err.message : "Không thể gửi khiếu nại. Vui lòng thử lại.";
+      setComplaintSubmitError(errorMsg);
+      Alert.alert("Lỗi", errorMsg);
+    } finally {
+      setComplaintSubmitting(false);
     }
   };
 
@@ -430,85 +472,81 @@ export default function CompanyMLMDetailScreen({
   };
 
   const renderComplaintContent = () => {
-    if (complaintLoading) {
-      return (
-        <View style={styles.loadingContent}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      );
-    }
-
-    if (!complaintData || complaintData.length === 0) {
-      return (
-        <Text style={styles.placeholderText}>
-          Không có khiếu nại nào
-        </Text>
-      );
-    }
-
     return (
-      <View>
-        {complaintData.map((item, index) => (
-          <View key={`complaint-${index}`} style={styles.complaintItem}>
-            {/* Complaint Status and Date */}
-            <View style={styles.complaintRow}>
-              <View style={styles.complaintColumn}>
-                <Text style={styles.complaintLabel}>Tình trạng</Text>
-                <Text style={styles.complaintValue}>{item.tinhtrang || item.status || "N/A"}</Text>
-              </View>
-              <View style={styles.complaintColumn}>
-                <Text style={styles.complaintLabel}>Ngày tiếp nhận</Text>
-                <Text style={styles.complaintValue}>{item.ngaytiepnhan || item.receivedDate || "N/A"}</Text>
-              </View>
-            </View>
-            <View style={styles.complaintDivider} />
+      <View style={styles.complaintForm}>
+        {/* Form Title */}
+        <Text style={styles.complaintFormTitle}>Gửi khiếu nại về doanh nghiệp này</Text>
+        <Text style={styles.complaintFormDescription}>
+          Vui lòng điền đầy đủ thông tin của bạn để gửi khiếu nại
+        </Text>
 
-            {/* Complaint Type and Content */}
-            <View style={styles.complaintRow}>
-              <View style={styles.complaintColumn}>
-                <Text style={styles.complaintLabel}>Loại khiếu nại</Text>
-                <Text style={styles.complaintValue}>{item.loai || item.type || "N/A"}</Text>
-              </View>
-            </View>
-            <View style={styles.complaintDivider} />
-
-            {/* Detailed Content */}
-            <View style={styles.complaintRow}>
-              <View style={styles.complaintColumn}>
-                <Text style={styles.complaintLabel}>Nội dung</Text>
-                <Text style={styles.complaintValue}>{item.noidung || item.content || "N/A"}</Text>
-              </View>
-            </View>
-            <View style={styles.complaintDivider} />
-
-            {/* Complaint Sender */}
-            <View style={styles.complaintRow}>
-              <View style={styles.complaintColumn}>
-                <Text style={styles.complaintLabel}>Người khiếu nại</Text>
-                <Text style={styles.complaintValue}>{item.nguoikhieunai || item.complainer || "N/A"}</Text>
-              </View>
-              <View style={styles.complaintColumn}>
-                <Text style={styles.complaintLabel}>Email</Text>
-                <Text style={styles.complaintValue}>{item.email || "N/A"}</Text>
-              </View>
-            </View>
-            <View style={styles.complaintDivider} />
-
-            {/* Resolution Date */}
-            <View style={styles.complaintRow}>
-              <View style={styles.complaintColumn}>
-                <Text style={styles.complaintLabel}>Ngày giải quyết</Text>
-                <Text style={styles.complaintValue}>{item.ngaygiaiquyet || item.resolutionDate || "N/A"}</Text>
-              </View>
-              <View style={styles.complaintColumn}>
-                <Text style={styles.complaintLabel}>Kết quả xử lý</Text>
-                <Text style={styles.complaintValue}>{item.ketquaxuly || item.result || "N/A"}</Text>
-              </View>
-            </View>
-
-            {index < complaintData.length - 1 && <View style={styles.itemSeparator} />}
+        {/* Error Message */}
+        {complaintSubmitError && (
+          <View style={styles.errorBanner}>
+            <Text style={styles.errorText}>{complaintSubmitError}</Text>
           </View>
-        ))}
+        )}
+
+        {/* Name Input */}
+        <View style={styles.formGroup}>
+          <Text style={styles.formLabel}>Họ tên *</Text>
+          <TextInput
+            style={styles.formInput}
+            placeholder="Nhập tên của bạn"
+            value={complaintFormName}
+            onChangeText={setComplaintFormName}
+            editable={!complaintSubmitting}
+            placeholderTextColor={theme.colors.muted}
+          />
+        </View>
+
+        {/* Email Input */}
+        <View style={styles.formGroup}>
+          <Text style={styles.formLabel}>Email *</Text>
+          <TextInput
+            style={styles.formInput}
+            placeholder="Nhập email của bạn"
+            value={complaintFormEmail}
+            onChangeText={setComplaintFormEmail}
+            keyboardType="email-address"
+            editable={!complaintSubmitting}
+            placeholderTextColor={theme.colors.muted}
+          />
+        </View>
+
+        {/* Content Input */}
+        <View style={styles.formGroup}>
+          <Text style={styles.formLabel}>Nội dung khiếu nại *</Text>
+          <TextInput
+            style={[styles.formInput, styles.formTextArea]}
+            placeholder="Mô tả chi tiết khiếu nại của bạn..."
+            value={complaintFormContent}
+            onChangeText={setComplaintFormContent}
+            multiline
+            numberOfLines={5}
+            editable={!complaintSubmitting}
+            placeholderTextColor={theme.colors.muted}
+            textAlignVertical="top"
+          />
+        </View>
+
+        {/* Submit Button */}
+        <Pressable
+          style={[styles.submitButton, complaintSubmitting && styles.submitButtonDisabled]}
+          onPress={handleSubmitComplaint}
+          disabled={complaintSubmitting}
+        >
+          {complaintSubmitting ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.submitButtonText}>Gửi khiếu nại</Text>
+          )}
+        </Pressable>
+
+        {/* Help Text */}
+        <Text style={styles.helpText}>
+          Các trường được đánh dấu * là bắt buộc. Khiếu nại của bạn sẽ được xem xét trong vòng 7 ngày làm việc.
+        </Text>
       </View>
     );
   };
@@ -611,9 +649,9 @@ export default function CompanyMLMDetailScreen({
                   loadCompanyOwner(company.id);
                 }
 
-                // Load Complaint data when expanding that section
-                if (newSection === "khieuNai" && company?.id && complaintData.length === 0) {
-                  loadCompanyComplaints(company.id);
+                // Clear form when opening complaint section
+                if (newSection === "khieuNai") {
+                  setComplaintSubmitError(null);
                 }
               }}
             >
@@ -1029,5 +1067,82 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.border,
     marginVertical: 8,
     marginHorizontal: 4,
+  },
+
+  // Complaint Form Styles
+  complaintForm: {
+    padding: 16,
+    backgroundColor: "#fafafa",
+  },
+  complaintFormTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: theme.colors.text,
+    marginBottom: 8,
+  },
+  complaintFormDescription: {
+    fontSize: 13,
+    color: theme.colors.muted,
+    marginBottom: 16,
+    lineHeight: 18,
+  },
+  errorBanner: {
+    backgroundColor: "#FEE2E2",
+    borderLeftWidth: 4,
+    borderLeftColor: "#DC2626",
+    padding: 12,
+    marginBottom: 16,
+    borderRadius: 4,
+  },
+  errorText: {
+    fontSize: 13,
+    color: "#991B1B",
+    fontWeight: "500",
+  },
+  formGroup: {
+    marginBottom: 16,
+  },
+  formLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: theme.colors.text,
+    marginBottom: 6,
+  },
+  formInput: {
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: theme.colors.text,
+    backgroundColor: "#fff",
+  },
+  formTextArea: {
+    paddingTop: 10,
+    height: 120,
+  },
+  submitButton: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  submitButtonDisabled: {
+    opacity: 0.6,
+  },
+  submitButtonText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  helpText: {
+    fontSize: 12,
+    color: theme.colors.muted,
+    lineHeight: 16,
+    textAlign: "center",
   },
 });

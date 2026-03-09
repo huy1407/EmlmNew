@@ -395,3 +395,33 @@ export const getCompanyComplaints = (sId) =>
         reject(error);
       });
   });
+
+/**
+ * Submit a complaint (Khiếu nại) about a company
+ * @param {string} companyId - Company ID being complained about
+ * @param {string} name - Complainer's name
+ * @param {string} email - Complainer's email
+ * @param {string} content - Complaint content/description
+ * @returns {Promise} Response from API
+ */
+export const submitComplaint = (companyId, name, email, content) =>
+  new Promise((resolve, reject) => {
+    let data = {
+      companyId,
+      name,
+      email,
+      content,
+    };
+    console.log("[v0] Submitting complaint:", data);
+    
+    apiRoot
+      .post('/complaints', data)
+      .then(response => {
+        console.log("[v0] Complaint submitted successfully:", response);
+        resolve(response);
+      })
+      .catch(error => {
+        console.error("[v0] Error submitting complaint:", error);
+        reject(error);
+      });
+  });
