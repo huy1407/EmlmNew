@@ -41,6 +41,8 @@ import { useRecentlyViewed } from "./src/hooks/useRecentlyViewed";
 import { useCompanySignals } from "./src/hooks/useCompanySignals";
 import { useCompareHistory } from "./src/hooks/useCompareHistory";
 import type { Route, RouteName, BookmarkType } from "./src/types";
+import CompanyMLMListScreen from "@/src/screens/CompanyMLMListScreen";
+import CompanyMLMDetailScreen from "@/src/screens/CompanyMLMDetailScreen";
 
 const TABS = [
   { key: "home", label: "Trang chủ" },
@@ -181,22 +183,15 @@ export default function App() {
       }
       case "company-list":
         return (
-          <CompanyListScreen
-            companies={COMPANIES}
+          <CompanyMLMListScreen
             onNavigate={(r) => go(r.name, r.params)}
           />
         );
       case "company-detail": {
-        const id = (currentRoute.params?.id as string) || "";
-        const company = COMPANIES.find((c) => c.id === id);
         return (
-          <CompanyDetailScreen
-            company={company}
-            getSignals={getCompanySignals}
-            onVoteTransparent={voteTransparent}
-            onVoteResearch={voteResearch}
-            onBack={back}
-            onViewDetail={() => company && addRecentlyViewed("company", company.id, company.name)}
+          <CompanyMLMDetailScreen
+            company={currentRoute.params?.company}
+            onBack={(r) => go(r.name, r.params)}
           />
         );
       }

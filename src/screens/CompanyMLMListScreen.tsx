@@ -14,7 +14,7 @@ import CompanyMLMItem from "../components/CompanyMLMItem";
 import SkeletonLoader from "../components/SkeletonLoader";
 import DisclaimerBanner from "../components/DisclaimerBanner";
 import SectionHeader from "../components/SectionHeader";
-import { fetchMLMCompanies } from "../api/client";
+import { getListCompany } from "../api/client";
 import type { CompanyMLM, Route } from "../types";
 import { theme } from "../styles/theme";
 
@@ -44,20 +44,12 @@ export default function CompanyMLMListScreen({
     try {
       setIsLoading(true);
       setError(null);
-      const data = await fetchMLMCompanies();
+      const data = await getListCompany();
       console.log("[v0] Loaded companies:", data);
-      
+
       // Data from API comes with fields: ten, sodangkydoanhnghiep, sodangkyhoatdong
-      const parsed = Array.isArray(data)
-        ? data.map((item, index) => ({
-            id: item.id || `company-${index}`,
-            ten: item.ten || "Unnamed",
-            sodangkydoanhnghiep: item.sodangkydoanhnghiep,
-            sodangkyhoatdong: item.sodangkyhoatdong,
-          }))
-        : [];
-      
-      setCompanies(parsed);
+
+      setCompanies(data);
     } catch (err) {
       console.error("[v0] Error loading companies:", err);
       setError("Không thể tải danh sách doanh nghiệp");

@@ -6,7 +6,8 @@ import {
   Pressable,
   StyleSheet,
   Share,
-  ActivityIndicator,
+  Image,
+    ActivityIndicator
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DisclaimerBanner from "../components/DisclaimerBanner";
@@ -60,9 +61,9 @@ export default function CompanyMLMDetailScreen({
   };
 
   const sections: ExpandableSection[] = [
-    { id: "registration", title: "Hộ số chung" },
-    { id: "updated", title: "Hộ số cập nhật" },
-    { id: "locations", title: "Trụ số chính/Chi nhánh/VP đại diện/Địa điểm kinh doanh" },
+    { id: "registration", title: "Hồ sơ chung" },
+    { id: "updated", title: "Hồ sơ cập nhật" },
+    { id: "locations", title: "Trụ sở chính/Chi nhánh/VP đại diện/Địa điểm kinh doanh" },
     { id: "representative", title: "Thông tin người đại diện" },
     { id: "owner", title: "Thông tin chủ sở hữu" },
     { id: "complaints", title: "Khiếu nại" },
@@ -148,17 +149,22 @@ export default function CompanyMLMDetailScreen({
         <View style={styles.cardHeader}>
           {/* Logo Placeholder */}
           <View style={styles.logoContainer}>
-            <Ionicons
-              name="business"
-              size={48}
-              color={theme.colors.primary}
+            <Image
+                style={{
+                  height: 60,
+                  width: 80,
+                  borderRadius: 5,
+                  resizeMode: 'contain',
+                }}
+                source={{uri: `${detailData?.logo}`}}
+                placeholderStyle={{backgroundColor: 'transparent'}}
             />
           </View>
 
           {/* Company Info */}
           <View style={styles.companyInfo}>
             <Text style={styles.companyName} numberOfLines={2}>
-              {company.ten}
+              {detailData?.ten}
             </Text>
 
             {/* Address */}
@@ -169,8 +175,8 @@ export default function CompanyMLMDetailScreen({
                 color={theme.colors.primary}
                 style={styles.addressIcon}
               />
-              <Text style={styles.addressText} numberOfLines={3}>
-                {detailData?.sDiaChi || "Thông tin địa chỉ sẽ được cập nhật"}
+              <Text style={styles.addressText} numberOfLines={4}>
+                {detailData?.diachi || "Thông tin địa chỉ sẽ được cập nhật"}
               </Text>
             </View>
 
@@ -182,134 +188,16 @@ export default function CompanyMLMDetailScreen({
           </View>
 
           {/* Share Button */}
-          <Pressable
-            style={styles.shareButton}
-            onPress={handleShare}
-          >
-            <Ionicons
-              name="share-social"
-              size={24}
-              color="#fff"
-            />
-          </Pressable>
-        </View>
-      </View>
-
-      {/* Expandable Sections */}
-      <View style={styles.sectionsContainer}>
-        {sections.map((section) => (
-          <View key={section.id}>
-            <Pressable
-              style={styles.sectionHeader}
-              onPress={() => toggleSection(section.id)}
-            >
-              <Text style={styles.sectionTitle}>{section.title}</Text>
-              <Ionicons
-                name={expandedSections.has(section.id) ? "chevron-down" : "chevron-forward"}
-                size={24}
-                color={theme.colors.muted}
-              />
-            </Pressable>
-
-            {expandedSections.has(section.id) && (
-              <View style={styles.sectionContent}>
-                <Text style={styles.contentText}>
-                  {getSectionContent(section.id)}
-                </Text>
-              </View>
-            )}
-
-            <View style={styles.divider} />
-          </View>
-        ))}
-      </View>
-
-      {/* Registration Info Summary */}
-      <View style={styles.summarySection}>
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>GCN đăng ký doanh nghiệp:</Text>
-          <Text style={styles.summaryValue}>
-            {company.sodangkydoanhnghiep || "N/A"}
-          </Text>
-        </View>
-        <View style={styles.divider} />
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>GCN đăng ký hoạt động BHDC:</Text>
-          <Text style={styles.summaryValue}>
-            {company.sodangkyhoatdong || "N/A"}
-          </Text>
-        </View>
-      </View>
-    </ScrollView>
-  );
-}
-
-  return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <DisclaimerBanner />
-
-      {isLoading && (
-        <View style={styles.loadingIndicator}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        </View>
-      )}
-
-      {error && (
-        <View style={styles.errorBanner}>
-          <Ionicons name="alert-circle" size={20} color="#EF4444" />
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
-      )}
-
-      {/* Company Card */}
-      <View style={styles.companyCard}>
-        <View style={styles.cardHeader}>
-          {/* Logo Placeholder */}
-          <View style={styles.logoContainer}>
-            <Ionicons
-              name="business"
-              size={48}
-              color={theme.colors.primary}
-            />
-          </View>
-
-          {/* Company Info */}
-          <View style={styles.companyInfo}>
-            <Text style={styles.companyName} numberOfLines={2}>
-              {company.ten}
-            </Text>
-
-            {/* Address */}
-            <View style={styles.addressRow}>
-              <Ionicons
-                name="location-outline"
-                size={16}
-                color={theme.colors.primary}
-                style={styles.addressIcon}
-              />
-              <Text style={styles.addressText} numberOfLines={3}>
-                {detailData?.sDiaChi || "Thông tin địa chỉ sẽ được cập nhật"}
-              </Text>
-            </View>
-
-            {/* Status Badge */}
-            <View style={styles.statusBadge}>
-              <View style={styles.statusDot} />
-              <Text style={styles.statusText}>Đang hoạt động</Text>
-            </View>
-          </View>
-
-          {/* Share Button */}
-          <Pressable
-            style={styles.shareButton}
-            onPress={handleShare}
-          >
-            <Ionicons
-              name="share-social"
-              size={24}
-              color="#fff"
-            />
-          </Pressable>
+          {/*<Pressable*/}
+          {/*  style={styles.shareButton}*/}
+          {/*  onPress={handleShare}*/}
+          {/*>*/}
+          {/*  <Ionicons*/}
+          {/*    name="share-social"*/}
+          {/*    size={24}*/}
+          {/*    color="#fff"*/}
+          {/*  />*/}
+          {/*</Pressable>*/}
         </View>
       </View>
 

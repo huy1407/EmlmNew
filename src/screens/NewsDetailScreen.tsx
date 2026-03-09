@@ -144,23 +144,9 @@ export default function NewsDetailScreen({ id, onViewDetail }: NewsDetailScreenP
                 fontWeight:'normal'
               }}
           />
-          <Text style={styles.contentText}>{newsDetail.content}</Text>
+          {/*<Text style={styles.contentText}>{newsDetail.content}</Text>*/}
         </>
       )}
-
-      {/* Action Buttons */}
-      <View style={styles.actions}>
-        {newsDetail.sourceUrl && (
-          <Pressable style={styles.btn} onPress={handleOpenSource}>
-            <Ionicons name="open-outline" size={16} color="#fff" style={styles.btnIcon} />
-            <Text style={styles.btnText}>Mở tài liệu tham khảo</Text>
-          </Pressable>
-        )}
-        <Pressable style={styles.btn} onPress={handleShare}>
-          <Ionicons name="share-social-outline" size={16} color="#fff" style={styles.btnIcon} />
-          <Text style={styles.btnText}>Chia sẻ</Text>
-        </Pressable>
-      </View>
     </ScrollView>
   );
 }

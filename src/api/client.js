@@ -230,7 +230,7 @@ export const getCompanyDetail = (sId) =>
       })
       .then(response => {
         try {
-          const detail = xmlStringToObject(response.data);
+          const detail = xmlStringToList(response.data)[0];
           console.log("[v0] MLM company detail fetched:", detail);
           resolve(detail);
         } catch (parseError) {
