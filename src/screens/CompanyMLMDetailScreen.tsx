@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DisclaimerBanner from "../components/DisclaimerBanner";
-import { getCompanyDetail, getCompanyHoSo, getCompanyAgency, getCompanyOwner } from "../api/client";
+import { getCompanyDetail, getCompanyHoSo, getCompanyAgency, getCompanyOwner, getCompanyComplaints } from "../api/client";
 import type { CompanyMLM } from "../types";
 import { theme } from "../styles/theme";
 
@@ -38,6 +38,8 @@ export default function CompanyMLMDetailScreen({
   const [agencyLoading, setAgencyLoading] = useState(false);
   const [ownerData, setOwnerData] = useState<any[]>([]);
   const [ownerLoading, setOwnerLoading] = useState(false);
+  const [complaintData, setComplaintData] = useState<any[]>([]);
+  const [complaintLoading, setComplaintLoading] = useState(false);
 
   useEffect(() => {
     if (company?.id) {
@@ -99,6 +101,20 @@ export default function CompanyMLMDetailScreen({
       setOwnerData([]);
     } finally {
       setOwnerLoading(false);
+    }
+  };
+
+  const loadCompanyComplaints = async (companyId: string) => {
+    try {
+      setComplaintLoading(true);
+      const data = await getCompanyComplaints(companyId);
+      console.log("[v0] Company Complaints data:", data);
+      setComplaintData(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("[v0] Error loading company Complaints:", err);
+      setComplaintData([]);
+    } finally {
+      setComplaintLoading(false);
     }
   };
 
@@ -413,6 +429,90 @@ export default function CompanyMLMDetailScreen({
     );
   };
 
+  const renderComplaintContent = () => {
+    if (complaintLoading) {
+      return (
+        <View style={styles.loadingContent}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      );
+    }
+
+    if (!complaintData || complaintData.length === 0) {
+      return (
+        <Text style={styles.placeholderText}>
+          Không có khiếu nại nào
+        </Text>
+      );
+    }
+
+    return (
+      <View>
+        {complaintData.map((item, index) => (
+          <View key={`complaint-${index}`} style={styles.complaintItem}>
+            {/* Complaint Status and Date */}
+            <View style={styles.complaintRow}>
+              <View style={styles.complaintColumn}>
+                <Text style={styles.complaintLabel}>Tình trạng</Text>
+                <Text style={styles.complaintValue}>{item.tinhtrang || item.status || "N/A"}</Text>
+              </View>
+              <View style={styles.complaintColumn}>
+                <Text style={styles.complaintLabel}>Ngày tiếp nhận</Text>
+                <Text style={styles.complaintValue}>{item.ngaytiepnhan || item.receivedDate || "N/A"}</Text>
+              </View>
+            </View>
+            <View style={styles.complaintDivider} />
+
+            {/* Complaint Type and Content */}
+            <View style={styles.complaintRow}>
+              <View style={styles.complaintColumn}>
+                <Text style={styles.complaintLabel}>Loại khiếu nại</Text>
+                <Text style={styles.complaintValue}>{item.loai || item.type || "N/A"}</Text>
+              </View>
+            </View>
+            <View style={styles.complaintDivider} />
+
+            {/* Detailed Content */}
+            <View style={styles.complaintRow}>
+              <View style={styles.complaintColumn}>
+                <Text style={styles.complaintLabel}>Nội dung</Text>
+                <Text style={styles.complaintValue}>{item.noidung || item.content || "N/A"}</Text>
+              </View>
+            </View>
+            <View style={styles.complaintDivider} />
+
+            {/* Complaint Sender */}
+            <View style={styles.complaintRow}>
+              <View style={styles.complaintColumn}>
+                <Text style={styles.complaintLabel}>Người khiếu nại</Text>
+                <Text style={styles.complaintValue}>{item.nguoikhieunai || item.complainer || "N/A"}</Text>
+              </View>
+              <View style={styles.complaintColumn}>
+                <Text style={styles.complaintLabel}>Email</Text>
+                <Text style={styles.complaintValue}>{item.email || "N/A"}</Text>
+              </View>
+            </View>
+            <View style={styles.complaintDivider} />
+
+            {/* Resolution Date */}
+            <View style={styles.complaintRow}>
+              <View style={styles.complaintColumn}>
+                <Text style={styles.complaintLabel}>Ngày giải quyết</Text>
+                <Text style={styles.complaintValue}>{item.ngaygiaiquyet || item.resolutionDate || "N/A"}</Text>
+              </View>
+              <View style={styles.complaintColumn}>
+                <Text style={styles.complaintLabel}>Kết quả xử lý</Text>
+                <Text style={styles.complaintValue}>{item.ketquaxuly || item.result || "N/A"}</Text>
+              </View>
+            </View>
+
+            {index < complaintData.length - 1 && <View style={styles.itemSeparator} />}
+          </View>
+        ))}
+      </View>
+    );
+  };
+
   if (!company) {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -510,6 +610,11 @@ export default function CompanyMLMDetailScreen({
                 if (newSection === "chuSoHuu" && company?.id && ownerData.length === 0) {
                   loadCompanyOwner(company.id);
                 }
+
+                // Load Complaint data when expanding that section
+                if (newSection === "khieuNai" && company?.id && complaintData.length === 0) {
+                  loadCompanyComplaints(company.id);
+                }
               }}
             >
               <Text style={styles.sectionTitle}>{section.title}</Text>
@@ -548,7 +653,13 @@ export default function CompanyMLMDetailScreen({
               </View>
             )}
 
-            {expandedSection === section.id && section.id !== "hoSoChung" && section.id !== "hoSoCapNhat" && section.id !== "truSoChiNhanh" && section.id !== "chuSoHuu" && (
+            {expandedSection === section.id && section.id === "khieuNai" && (
+              <View style={styles.sectionContent}>
+                {renderComplaintContent()}
+              </View>
+            )}
+
+            {expandedSection === section.id && section.id !== "hoSoChung" && section.id !== "hoSoCapNhat" && section.id !== "truSoChiNhanh" && section.id !== "chuSoHuu" && section.id !== "khieuNai" && (
               <View style={styles.sectionContent}>
                 <Text style={styles.placeholderText}>
                   Thông tin sẽ được cập nhật
@@ -882,6 +993,38 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   ownerDivider: {
+    height: 1,
+    backgroundColor: theme.colors.border,
+    marginVertical: 8,
+    marginHorizontal: 4,
+  },
+
+  // Complaint/Khiếu nại Styles
+  complaintItem: {
+    paddingVertical: 12,
+    backgroundColor: "#fafafa",
+  },
+  complaintRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 8,
+  },
+  complaintColumn: {
+    flex: 1,
+  },
+  complaintLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: theme.colors.muted,
+    marginBottom: 4,
+  },
+  complaintValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.text,
+    lineHeight: 20,
+  },
+  complaintDivider: {
     height: 1,
     backgroundColor: theme.colors.border,
     marginVertical: 8,

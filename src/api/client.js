@@ -357,3 +357,41 @@ export const getCompanyOwner = (sId) =>
         reject(error);
       });
   });
+
+/**
+ * Fetch company complaints (Khiếu nại) from VCCA SOAP API
+ * @param {string} sId - Company ID
+ * @returns {Promise<Array>} Array of complaint items
+ */
+export const getCompanyComplaints = (sId) =>
+  new Promise((resolve, reject) => {
+    let xmls = `<?xml version="1.0" encoding="utf-8"?>
+    <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+    <VccaDNBHDCKhieuNai xmlns="http://tempuri.org/">
+        <sId>${sId}</sId>
+    </VccaDNBHDCKhieuNai>
+    </soap:Body>
+    </soap:Envelope>`;
+    apiRootVCCA
+      .get(BASE_API_URL_VCCA + '/VccaDNBHDCKhieuNai?sId=' + sId, xmls, {
+        headers: {
+          SOAPAction: 'http://tempuri.org/VccaDNBHDCKhieuNai',
+          'Content-Type': 'text/xml; charset=utf-8',
+        },
+      })
+      .then(response => {
+        try {
+          const complaintData = xmlStringToList(response.data);
+          console.log("[v0] Company Complaints fetched:", complaintData);
+          resolve(complaintData);
+        } catch (parseError) {
+          console.error("[v0] Error parsing company Complaints:", parseError);
+          reject(parseError);
+        }
+      })
+      .catch(error => {
+        console.error("[v0] Error fetching company Complaints:", error);
+        reject(error);
+      });
+  });
