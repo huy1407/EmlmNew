@@ -3,11 +3,10 @@ import {
   View,
   Text,
   ScrollView,
-  Pressable,
   StyleSheet,
   Share,
   Image,
-    ActivityIndicator
+  ActivityIndicator
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DisclaimerBanner from "../components/DisclaimerBanner";
@@ -20,12 +19,6 @@ interface CompanyMLMDetailScreenProps {
   onBack?: () => void;
 }
 
-interface ExpandableSection {
-  id: string;
-  title: string;
-  content?: string;
-}
-
 interface CompanyDetailData {
   [key: string]: any;
 }
@@ -34,7 +27,6 @@ export default function CompanyMLMDetailScreen({
   company,
   onBack,
 }: CompanyMLMDetailScreenProps) {
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [detailData, setDetailData] = useState<CompanyDetailData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,15 +52,16 @@ export default function CompanyMLMDetailScreen({
     }
   };
 
-  const sections: ExpandableSection[] = [
-    { id: "registration", title: "Hồ sơ chung" },
-    { id: "updated", title: "Hồ sơ cập nhật" },
-    { id: "locations", title: "Trụ sở chính/Chi nhánh/VP đại diện/Địa điểm kinh doanh" },
-    { id: "representative", title: "Thông tin người đại diện" },
-    { id: "owner", title: "Thông tin chủ sở hữu" },
-    { id: "complaints", title: "Khiếu nại" },
-    { id: "evaluation", title: "Đánh giá doanh nghiệp" },
-  ];
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: `${company?.ten}\n\nGCN đăng ký: ${company?.sodangkydoanhnghiep || "N/A"}\nGCN hoạt động: ${company?.sodangkyhoatdong || "N/A"}`,
+        title: company?.ten,
+      });
+    } catch (error) {
+      console.error("[v0] Error sharing:", error);
+    }
+  };
 
   if (!company) {
     return (
@@ -80,52 +73,6 @@ export default function CompanyMLMDetailScreen({
       </ScrollView>
     );
   }
-
-  const toggleSection = (id: string) => {
-    const newExpanded = new Set(expandedSections);
-    if (newExpanded.has(id)) {
-      newExpanded.delete(id);
-    } else {
-      newExpanded.add(id);
-    }
-    setExpandedSections(newExpanded);
-  };
-
-  const getSectionContent = (sectionId: string): string => {
-    if (!detailData) {
-      return "Đang tải dữ liệu...";
-    }
-
-    switch (sectionId) {
-      case "registration":
-        return detailData.sHoSoChung || "Không có dữ liệu";
-      case "updated":
-        return detailData.sHoSoCapNhat || "Không có dữ liệu";
-      case "locations":
-        return detailData.sNoiKinhDoanh || "Không có dữ liệu";
-      case "representative":
-        return detailData.sThongTinNguoiDaiDien || "Không có dữ liệu";
-      case "owner":
-        return detailData.sThongTinChuSoHuu || "Không có dữ liệu";
-      case "complaints":
-        return detailData.sKhieuNai || "Không có dữ liệu";
-      case "evaluation":
-        return detailData.sDanhGia || "Không có dữ liệu";
-      default:
-        return "Không có dữ liệu";
-    }
-  };
-
-  const handleShare = async () => {
-    try {
-      await Share.share({
-        message: `${company.ten}\n\nGCN đăng ký: ${company.sodangkydoanhnghiep || "N/A"}\nGCN hoạt động: ${company.sodangkyhoatdong || "N/A"}`,
-        title: company.ten,
-      });
-    } catch (error) {
-      console.error("[v0] Error sharing:", error);
-    }
-  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -147,24 +94,24 @@ export default function CompanyMLMDetailScreen({
       {/* Company Card */}
       <View style={styles.companyCard}>
         <View style={styles.cardHeader}>
-          {/* Logo Placeholder */}
+          {/* Logo */}
           <View style={styles.logoContainer}>
             <Image
-                style={{
-                  height: 60,
-                  width: 80,
-                  borderRadius: 5,
-                  resizeMode: 'contain',
-                }}
-                source={{uri: `${detailData?.logo}`}}
-                placeholderStyle={{backgroundColor: 'transparent'}}
+              style={{
+                height: 60,
+                width: 80,
+                borderRadius: 5,
+                resizeMode: 'contain',
+              }}
+              source={{uri: `${detailData?.logo}`}}
+              placeholderStyle={{backgroundColor: 'transparent'}}
             />
           </View>
 
           {/* Company Info */}
           <View style={styles.companyInfo}>
             <Text style={styles.companyName} numberOfLines={2}>
-              {detailData?.ten}
+              {detailData?.ten || company.ten}
             </Text>
 
             {/* Address */}
@@ -176,7 +123,7 @@ export default function CompanyMLMDetailScreen({
                 style={styles.addressIcon}
               />
               <Text style={styles.addressText} numberOfLines={4}>
-                {detailData?.diachi || "Thông tin địa chỉ sẽ được cập nhật"}
+                {detailData?.diachi || company.diachi || "Thông tin địa chỉ sẽ được cập nhật"}
               </Text>
             </View>
 
@@ -186,64 +133,127 @@ export default function CompanyMLMDetailScreen({
               <Text style={styles.statusText}>Đang hoạt động</Text>
             </View>
           </View>
-
-          {/* Share Button */}
-          {/*<Pressable*/}
-          {/*  style={styles.shareButton}*/}
-          {/*  onPress={handleShare}*/}
-          {/*>*/}
-          {/*  <Ionicons*/}
-          {/*    name="share-social"*/}
-          {/*    size={24}*/}
-          {/*    color="#fff"*/}
-          {/*  />*/}
-          {/*</Pressable>*/}
         </View>
       </View>
 
-      {/* Expandable Sections */}
-      <View style={styles.sectionsContainer}>
-        {sections.map((section) => (
-          <View key={section.id}>
-            <Pressable
-              style={styles.sectionHeader}
-              onPress={() => toggleSection(section.id)}
-            >
-              <Text style={styles.sectionTitle}>{section.title}</Text>
-              <Ionicons
-                name={expandedSections.has(section.id) ? "chevron-down" : "chevron-forward"}
-                size={24}
-                color={theme.colors.muted}
-              />
-            </Pressable>
-
-            {expandedSections.has(section.id) && (
-              <View style={styles.sectionContent}>
-                <Text style={styles.contentText}>
-                  {getSectionContent(section.id)}
-                </Text>
-              </View>
-            )}
-
-            <View style={styles.divider} />
+      {/* Common Profile Section - Hồ sơ chung */}
+      <View style={styles.profileSection}>
+        <Text style={styles.profileTitle}>Hồ sơ chung</Text>
+        
+        {/* Contact Information */}
+        <View style={styles.infoGroup}>
+          <View style={styles.infoRow}>
+            <View style={styles.infoColumn}>
+              <Text style={styles.infoLabel}>Tỉnh thành</Text>
+              <Text style={styles.infoValue}>{detailData?.tinhthanh || "N/A"}</Text>
+            </View>
+            <View style={styles.infoColumn}>
+              <Text style={styles.infoLabel}>Điện thoại</Text>
+              <Text style={styles.infoValue}>{detailData?.dienthoai || "N/A"}</Text>
+            </View>
           </View>
-        ))}
+          <View style={styles.divider} />
+          
+          <View style={styles.infoRow}>
+            <View style={styles.infoColumn}>
+              <Text style={styles.infoLabel}>Hotline</Text>
+              <Text style={styles.infoValue}>{detailData?.hotline || "N/A"}</Text>
+            </View>
+            <View style={styles.infoColumn}>
+              <Text style={styles.infoLabel}>Website</Text>
+              <Text style={styles.infoValue}>{detailData?.website || "N/A"}</Text>
+            </View>
+          </View>
+          <View style={styles.divider} />
+          
+          <View style={styles.infoRow}>
+            <View style={styles.infoColumn}>
+              <Text style={styles.infoLabel}>Email</Text>
+              <Text style={styles.infoValue}>{detailData?.email || "N/A"}</Text>
+            </View>
+          </View>
+        </View>
       </View>
 
-      {/* Registration Info Summary */}
-      <View style={styles.summarySection}>
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>GCN đăng ký doanh nghiệp:</Text>
-          <Text style={styles.summaryValue}>
-            {company.sodangkydoanhnghiep || "N/A"}
-          </Text>
+      {/* Business Registration Section */}
+      <View style={styles.profileSection}>
+        <Text style={styles.sectionSubtitle}>GCN đăng ký doanh nghiệp/đầu tư</Text>
+        
+        <View style={styles.infoGroup}>
+          <View style={styles.infoRow}>
+            <View style={styles.infoColumn}>
+              <Text style={styles.infoLabel}>Số đăng ký</Text>
+              <Text style={styles.infoValue}>{detailData?.sodangkydoanhnghiep || company.sodangkydoanhnghiep || "N/A"}</Text>
+            </View>
+            <View style={styles.infoColumn}>
+              <Text style={styles.infoLabel}>Ngày cấp</Text>
+              <Text style={styles.infoValue}>{detailData?.ngaycap1 || "N/A"}</Text>
+            </View>
+          </View>
+          <View style={styles.divider} />
+          
+          <View style={styles.infoRow}>
+            <View style={styles.infoColumn}>
+              <Text style={styles.infoLabel}>Ngày sửa đổi</Text>
+              <Text style={styles.infoValue}>{detailData?.ngaysuadoi1 || "N/A"}</Text>
+            </View>
+          </View>
         </View>
-        <View style={styles.divider} />
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>GCN đăng ký hoạt động BHDC:</Text>
-          <Text style={styles.summaryValue}>
-            {company.sodangkyhoatdong || "N/A"}
-          </Text>
+      </View>
+
+      {/* Activity Certificate Section */}
+      <View style={styles.profileSection}>
+        <Text style={styles.sectionSubtitle}>GCN đăng ký hoạt động BHĐC</Text>
+        
+        <View style={styles.infoGroup}>
+          <View style={styles.infoRow}>
+            <View style={styles.infoColumn}>
+              <Text style={styles.infoLabel}>Số đăng ký</Text>
+              <Text style={styles.infoValue}>{detailData?.sodangkyhoatdong || company.sodangkyhoatdong || "N/A"}</Text>
+            </View>
+            <View style={styles.infoColumn}>
+              <Text style={styles.infoLabel}>Ngày cấp</Text>
+              <Text style={styles.infoValue}>{detailData?.ngaycap2 || "N/A"}</Text>
+            </View>
+          </View>
+          <View style={styles.divider} />
+          
+          <View style={styles.infoRow}>
+            <View style={styles.infoColumn}>
+              <Text style={styles.infoLabel}>Ngày sửa đổi bổ sung</Text>
+              <Text style={styles.infoValue}>{detailData?.ngaysuadoi2 || "N/A"}</Text>
+            </View>
+            <View style={styles.infoColumn}>
+              <Text style={styles.infoLabel}>Ngày gia hạn</Text>
+              <Text style={styles.infoValue}>{detailData?.ngaygiahan || "N/A"}</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Representative Section */}
+      <View style={styles.profileSection}>
+        <Text style={styles.sectionSubtitle}>Người đại diện theo pháp luật</Text>
+        
+        <View style={styles.infoGroup}>
+          <View style={styles.infoRow}>
+            <View style={styles.infoColumn}>
+              <Text style={styles.infoLabel}>Họ tên</Text>
+              <Text style={styles.infoValue}>{detailData?.daidien || "N/A"}</Text>
+            </View>
+            <View style={styles.infoColumn}>
+              <Text style={styles.infoLabel}>CMND/Hộ chiếu/MSDN</Text>
+              <Text style={styles.infoValue}>{detailData?.cmnd || "N/A"}</Text>
+            </View>
+          </View>
+          <View style={styles.divider} />
+          
+          <View style={styles.infoRow}>
+            <View style={styles.infoColumn}>
+              <Text style={styles.infoLabel}>Chức vụ</Text>
+              <Text style={styles.infoValue}>{detailData?.chucvu || "N/A"}</Text>
+            </View>
+          </View>
         </View>
       </View>
     </ScrollView>
@@ -356,73 +366,57 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#22C55E",
   },
-  shareButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    backgroundColor: theme.colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
-  },
 
-  // Sections
-  sectionsContainer: {
-    backgroundColor: "#fff",
-    marginHorizontal: 16,
-    borderRadius: 12,
-    overflow: "hidden",
-    marginBottom: 16,
-    ...theme.shadow,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    color: theme.colors.text,
-    fontWeight: "500",
-    flex: 1,
-  },
-  sectionContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    backgroundColor: theme.colors.card,
-  },
-  contentText: {
-    fontSize: 13,
-    color: theme.colors.muted,
-    lineHeight: 20,
-  },
+  // Divider
   divider: {
     height: 1,
     backgroundColor: theme.colors.border,
+    marginVertical: 8,
   },
 
-  // Summary Section
-  summarySection: {
+  // Profile Section Styles
+  profileSection: {
     backgroundColor: "#fff",
     marginHorizontal: 16,
+    marginVertical: 8,
     borderRadius: 12,
     overflow: "hidden",
+    padding: 16,
     ...theme.shadow,
   },
-  summaryItem: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+  profileTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: theme.colors.text,
+    marginBottom: 12,
   },
-  summaryLabel: {
-    fontSize: 13,
-    color: theme.colors.muted,
+  sectionSubtitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.text,
+    marginBottom: 12,
+  },
+  infoGroup: {
+    gap: 0,
+  },
+  infoRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 12,
+  },
+  infoColumn: {
+    flex: 1,
+  },
+  infoLabel: {
+    fontSize: 12,
     fontWeight: "500",
+    color: theme.colors.muted,
     marginBottom: 4,
   },
-  summaryValue: {
+  infoValue: {
     fontSize: 14,
-    color: theme.colors.text,
     fontWeight: "600",
+    color: theme.colors.text,
+    lineHeight: 20,
   },
 });
