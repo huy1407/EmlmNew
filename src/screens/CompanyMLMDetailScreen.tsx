@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DisclaimerBanner from "../components/DisclaimerBanner";
-import { getCompanyDetail } from "../api/client";
+import { getCompanyDetail, getCompanyHoSo } from "../api/client";
 import type { CompanyMLM } from "../types";
 import { theme } from "../styles/theme";
 
@@ -32,6 +32,8 @@ export default function CompanyMLMDetailScreen({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const [hoSoData, setHoSoData] = useState<any[]>([]);
+  const [hoSoLoading, setHoSoLoading] = useState(false);
 
   useEffect(() => {
     if (company?.id) {
@@ -51,6 +53,20 @@ export default function CompanyMLMDetailScreen({
       setError("Không thể tải chi tiết doanh nghiệp");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadCompanyHoSo = async (companyId: string) => {
+    try {
+      setHoSoLoading(true);
+      const data = await getCompanyHoSo(companyId);
+      console.log("[v0] Company HoSo data:", data);
+      setHoSoData(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("[v0] Error loading company HoSo:", err);
+      setHoSoData([]);
+    } finally {
+      setHoSoLoading(false);
     }
   };
 
@@ -191,6 +207,58 @@ export default function CompanyMLMDetailScreen({
     );
   };
 
+  const renderProfileUpdateContent = () => {
+    if (hoSoLoading) {
+      return (
+        <View style={styles.loadingContent}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      );
+    }
+
+    if (!hoSoData || hoSoData.length === 0) {
+      return (
+        <Text style={styles.placeholderText}>
+          Không có thông tin hồ sơ cập nhật
+        </Text>
+      );
+    }
+
+    return (
+      <View>
+        {hoSoData.map((item, index) => (
+          <View key={`hoso-${index}`} style={styles.hoSoItem}>
+            {/* Category Name */}
+            <Text style={styles.hoSoCategoryName}>{item.category_name || item.categoryName || "Danh mục"}</Text>
+
+            {/* Profile Name and Files */}
+            <View style={styles.hoSoRow}>
+              <View style={styles.hoSoColumn}>
+                <Text style={styles.hoSoLabel}>Tên hồ sơ</Text>
+                <Text style={styles.hoSoValue}>{item.ten || item.name || "N/A"}</Text>
+              </View>
+              <View style={styles.hoSoColumn}>
+                <Text style={styles.hoSoLabel}>Tệp</Text>
+                <Text style={styles.hoSoValue}>{item.files || item.file || "N/A"}</Text>
+              </View>
+            </View>
+
+            {/* Date Sent */}
+            <View style={styles.hoSoDivider} />
+            <View style={styles.hoSoRow}>
+              <View style={styles.hoSoColumn}>
+                <Text style={styles.hoSoLabel}>Ngày gửi</Text>
+                <Text style={styles.hoSoValue}>{item.ngaygui || item.dateSent || "N/A"}</Text>
+              </View>
+            </View>
+
+            {index < hoSoData.length - 1 && <View style={styles.itemSeparator} />}
+          </View>
+        ))}
+      </View>
+    );
+  };
+
   if (!company) {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -270,11 +338,15 @@ export default function CompanyMLMDetailScreen({
           <View key={section.id} style={styles.sectionWrapper}>
             <Pressable
               style={styles.sectionHeader}
-              onPress={() =>
-                setExpandedSection(
-                  expandedSection === section.id ? null : section.id
-                )
-              }
+              onPress={() => {
+                const newSection = expandedSection === section.id ? null : section.id;
+                setExpandedSection(newSection);
+                
+                // Load HoSo data when expanding that section
+                if (newSection === "hoSoCapNhat" && company?.id && hoSoData.length === 0) {
+                  loadCompanyHoSo(company.id);
+                }
+              }}
             >
               <Text style={styles.sectionTitle}>{section.title}</Text>
               <Ionicons
@@ -294,7 +366,13 @@ export default function CompanyMLMDetailScreen({
               </View>
             )}
 
-            {expandedSection === section.id && section.id !== "hoSoChung" && (
+            {expandedSection === section.id && section.id === "hoSoCapNhat" && (
+              <View style={styles.sectionContent}>
+                {renderProfileUpdateContent()}
+              </View>
+            )}
+
+            {expandedSection === section.id && section.id !== "hoSoChung" && section.id !== "hoSoCapNhat" && (
               <View style={styles.sectionContent}>
                 <Text style={styles.placeholderText}>
                   Thông tin sẽ được cập nhật
@@ -505,5 +583,54 @@ const styles = StyleSheet.create({
     color: theme.colors.muted,
     textAlign: "center",
     paddingVertical: 12,
+  },
+
+  // HoSo Profile Update Styles
+  loadingContent: {
+    paddingVertical: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  hoSoItem: {
+    paddingVertical: 12,
+    backgroundColor: "#fafafa",
+  },
+  hoSoCategoryName: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: theme.colors.primary,
+    marginBottom: 12,
+    paddingHorizontal: 4,
+  },
+  hoSoRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 8,
+  },
+  hoSoColumn: {
+    flex: 1,
+  },
+  hoSoLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: theme.colors.muted,
+    marginBottom: 4,
+  },
+  hoSoValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.text,
+    lineHeight: 20,
+  },
+  hoSoDivider: {
+    height: 1,
+    backgroundColor: theme.colors.border,
+    marginVertical: 8,
+    marginHorizontal: 4,
+  },
+  itemSeparator: {
+    height: 1,
+    backgroundColor: theme.colors.border,
+    marginVertical: 8,
   },
 });
