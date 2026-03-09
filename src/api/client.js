@@ -281,3 +281,41 @@ export const getCompanyHoSo = (sId) =>
         reject(error);
       });
   });
+
+/**
+ * Fetch company agency/branch information (Trụ sở chính/Chi nhánh/VP đại diện) from VCCA SOAP API
+ * @param {string} sId - Company ID
+ * @returns {Promise<Array>} Array of agency/branch items
+ */
+export const getCompanyAgency = (sId) =>
+  new Promise((resolve, reject) => {
+    let xmls = `<?xml version="1.0" encoding="utf-8"?>
+    <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+    <VccaDNBHDCChinhanh xmlns="http://tempuri.org/">
+        <sId>${sId}</sId>
+    </VccaDNBHDCChinhanh>
+    </soap:Body>
+    </soap:Envelope>`;
+    apiRootVCCA
+      .get(BASE_API_URL_VCCA + '/VccaDNBHDCChinhanh?sId=' + sId, xmls, {
+        headers: {
+          SOAPAction: 'http://tempuri.org/VccaDNBHDCChinhanh',
+          'Content-Type': 'text/xml; charset=utf-8',
+        },
+      })
+      .then(response => {
+        try {
+          const agencyData = xmlStringToList(response.data);
+          console.log("[v0] Company Agency fetched:", agencyData);
+          resolve(agencyData);
+        } catch (parseError) {
+          console.error("[v0] Error parsing company Agency:", parseError);
+          reject(parseError);
+        }
+      })
+      .catch(error => {
+        console.error("[v0] Error fetching company Agency:", error);
+        reject(error);
+      });
+  });
