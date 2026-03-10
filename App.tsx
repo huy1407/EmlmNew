@@ -10,6 +10,7 @@ import KnowledgeListScreen from "./src/screens/KnowledgeListScreen";
 import KnowledgeDetailScreen from "./src/screens/KnowledgeDetailScreen";
 import RegulationListScreen from "./src/screens/RegulationListScreen";
 import RegulationDetailScreen from "./src/screens/RegulationDetailScreen";
+import RegulationQAScreen from "./src/screens/RegulationQAScreen";
 import CompanyListScreen from "./src/screens/CompanyListScreen";
 import CompanyDetailScreen from "./src/screens/CompanyDetailScreen";
 import QAListScreen from "./src/screens/QAListScreen";
@@ -178,6 +179,17 @@ export default function App() {
             doc={doc}
             onBack={back}
             onViewDetail={() => doc && addRecentlyViewed("regulation", doc.id, doc.title)}
+            onNavigate={(r) => go(r.name, r.params)}
+          />
+        );
+      }
+      case "regulation-qa": {
+        const id = (currentRoute.params?.id as string) || "";
+        const doc = REGULATION_DOCS.find((d) => d.id === id);
+        return (
+          <RegulationQAScreen
+            regulation={doc}
+            onBack={back}
           />
         );
       }

@@ -8,6 +8,13 @@ export interface KnowledgeArticle {
   updatedAt: string;
 }
 
+export interface RegulationSection {
+  sectionName: string;
+  sectionIndex: number;
+  title: string;
+  content: string;
+}
+
 export interface RegulationDoc {
   id: string;
   title: string;
@@ -15,6 +22,8 @@ export interface RegulationDoc {
   content: string;
   sourceUrl?: string;
   updatedAt: string;
+  sections?: RegulationSection[];
+  shortName?: string;
 }
 
 export interface Company {
@@ -99,6 +108,7 @@ export type RouteName =
   | "knowledge-detail"
   | "regulation-list"
   | "regulation-detail"
+  | "regulation-qa"
   | "company-list"
   | "company-detail"
   | "qa-list"

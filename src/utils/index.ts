@@ -1,5 +1,6 @@
 /** eMLM - Utility functions */
 import { Share } from "react-native";
+import type { RegulationDoc, RegulationSection } from "../types";
 
 const SHARING_DISCLAIMER = "(eMLM) Ứng dụng cộng đồng. Thông tin chỉ mang tính tham khảo.";
 
@@ -51,4 +52,63 @@ export function computePct(a: number, b: number): { aPct: number; bPct: number }
     aPct: Math.round((a / total) * 100),
     bPct: Math.round((b / total) * 100),
   };
+}
+
+/**
+ * Search regulations including section-level results
+ */
+export interface RegulationSearchResult {
+  regulation: RegulationDoc;
+  matchType: "title" | "summary" | "section";
+  sectionIndex?: number;
+  section?: RegulationSection;
+}
+
+export function searchRegulations(
+  regulations: RegulationDoc[],
+  query: string
+): RegulationSearchResult[] {
+  if (!query.trim()) return [];
+
+  const q = query.toLowerCase();
+  const results: RegulationSearchResult[] = [];
+
+  for (const regulation of regulations) {
+    // Check title and summary
+    if (regulation.title.toLowerCase().includes(q)) {
+      results.push({
+        regulation,
+        matchType: "title",
+      });
+      continue;
+    }
+
+    if (regulation.summary.toLowerCase().includes(q)) {
+      results.push({
+        regulation,
+        matchType: "summary",
+      });
+      continue;
+    }
+
+    // Check sections
+    if (regulation.sections) {
+      for (let i = 0; i < regulation.sections.length; i++) {
+        const section = regulation.sections[i];
+        if (
+          section.title.toLowerCase().includes(q) ||
+          section.content.toLowerCase().includes(q)
+        ) {
+          results.push({
+            regulation,
+            matchType: "section",
+            sectionIndex: i,
+            section,
+          });
+        }
+      }
+    }
+  }
+
+  return results;
 }

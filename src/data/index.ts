@@ -6,7 +6,13 @@ import type {
   QAItem,
   AlertPost,
   NewsItem,
+  RegulationSection,
 } from "../types";
+
+// Import structured regulation data from JSON files
+import nghiDinh40Data from "../json/nghiDinh40.json";
+import nghiDinh141Data from "../json/nghiDinh141.json";
+import thongTu10Data from "../json/thongTu10.json";
 
 export const KNOWLEDGE_ARTICLES: KnowledgeArticle[] = [
   {
@@ -67,6 +73,8 @@ export const REGULATION_DOCS: RegulationDoc[] = [
     content: "Nghị định 40/2018/NĐ-CP quy định chi tiết về điều kiện, thủ tục cấp phép, hoạt động, tạm dừng và dừng hoạt động kinh doanh bán hàng đa cấp.\n\nNội dung chính:\n- Doanh nghiệp muốn kinh doanh đa cấp phải được Bộ Công Thương cấp phép\n- Phải tuân thủ các quy định về hoa hồng, tuyên truyền\n- Người tham gia có quyền hủy hợp đồng trong 30 ngày\n- Không được hứa hẹn thu nhập không thực tế\n- Phải công bố công khai chính sách, quy chế\n\nNội dung này không thay thế tư vấn pháp lý chính thức.",
     sourceUrl: "https://vanban.chinhphu.vn/?pageid=27160&docid=195801",
     updatedAt: "2025-01-10T00:00:00Z",
+    shortName: "Nghị định 40/2018",
+    sections: (nghiDinh40Data as { list: RegulationSection[] }).list,
   },
   {
     id: "r2",
