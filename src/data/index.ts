@@ -14,6 +14,52 @@ import nghiDinh40Data from "../json/nghiDinh40.json";
 import nghiDinh141Data from "../json/nghiDinh141.json";
 import thongTu10Data from "../json/thongTu10.json";
 
+// Import mockup company data
+import mockupData from "../json/mockup.json";
+
+/**
+ * Transform mockup.json company data to Company interface
+ */
+function transformMockupCompanies(): Company[] {
+  if (!mockupData?.daCapCompanyList || !Array.isArray(mockupData.daCapCompanyList)) {
+    return [];
+  }
+
+  return mockupData.daCapCompanyList
+    .slice(0, 20) // Limit to first 20 companies
+    .map((company: any, index: number) => {
+      const hoSoChung = company.HoSoChung || {};
+      const tenDoanhNghiep = hoSoChung.TenDoanhNghiep || "";
+
+      return {
+        id: `mockup-c${index + 1}`,
+        name: tenDoanhNghiep,
+        shortDesc: `${hoSoChung.DiaChi || "Địa chỉ không xác định"}. Tình trạng: ${hoSoChung.TinhTrang || "N/A"}`,
+        description: `Công ty: ${tenDoanhNghiep}\nĐịa chỉ: ${hoSoChung.DiaChi || "N/A"}\nĐiện thoại: ${hoSoChung.DienThoai || "N/A"}\nWebsite: ${hoSoChung.Website || "N/A"}`,
+        licenseStatus: hoSoChung.TinhTrang === "Đang hoạt động" ? ("licensed" as const) : ("inactive" as const),
+        headquarters: hoSoChung.TinhThanh || "Việt Nam",
+        websiteUrl: hoSoChung.Website ? `https://${hoSoChung.Website}`.replace("https://https://", "https://") : undefined,
+        tags: ["Từ đó thị", "Được phép hoạt động"],
+        productCategories: [hoSoChung.TenDoanhNghiep || "Sản phẩm đa dạng"],
+        communitySignals: {
+          transparentCount: 85,
+          researchCount: 60,
+        },
+        foundedYear: 2015,
+        // Store additional metadata from mockup
+        metadata: {
+          gcndkdn: hoSoChung.GCNDKDN,
+          gcndkhd: hoSoChung.GCNDKHD,
+          nguoiDaiDienPL: hoSoChung.NguoiDaiDienPL,
+          chucVu: hoSoChung.ChucVu,
+          tinhTrang: hoSoChung.TinhTrang,
+          email: hoSoChung.Email,
+          hotline: hoSoChung.Hotline,
+        },
+      } as any;
+    });
+}
+
 export const KNOWLEDGE_ARTICLES: KnowledgeArticle[] = [
   {
     id: "k1",
@@ -120,6 +166,7 @@ export const REGULATION_DOCS: RegulationDoc[] = [
 
 // Nguồn tham khảo: Bộ Công Thương, vcca.gov.vn, moit.gov.vn, Google
 export const COMPANIES: Company[] = [
+  ...transformMockupCompanies(),
   {
     id: "c1",
     name: "Công ty TNHH MTV Herbalife Việt Nam",

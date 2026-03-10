@@ -31,7 +31,7 @@ export interface Company {
   name: string;
   shortDesc: string;
   description?: string;
-  licenseStatus?: "licensed" | "unknown";
+  licenseStatus?: "licensed" | "unknown" | "inactive";
   foundedYear?: number;
   headquarters?: string;
   websiteUrl?: string;
@@ -40,6 +40,16 @@ export interface Company {
   communitySignals: {
     transparentCount: number;
     researchCount: number;
+  };
+  metadata?: {
+    gcndkdn?: string;
+    gcndkhd?: string;
+    nguoiDaiDienPL?: string;
+    chucVu?: string;
+    tinhTrang?: string;
+    email?: string;
+    hotline?: string | number;
+    [key: string]: any;
   };
 }
 
