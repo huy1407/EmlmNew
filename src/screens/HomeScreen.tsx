@@ -26,7 +26,7 @@ interface HomeScreenProps {
 const FEATURES = [
   { key: "knowledge-list", title: "Kiến thức MLM" },
   { key: "regulation-list", title: "Pháp luật (tham khảo)" },
-  { key: "company-list", title: "Doanh nghiệp" },
+  { key: "company-list", title: "Doanh nghiệp bán hàng đa cấp" },
   { key: "qa-list", title: "Hỏi & đáp" },
   { key: "alert-list", title: "Cảnh báo" },
   { key: "news-list", title: "Tin tức" },
@@ -41,7 +41,7 @@ export default function HomeScreen({
 }: HomeScreenProps) {
   const { getProgressPercentage } = useLearningProgress();
   const [riskAssessmentExpanded, setRiskAssessmentExpanded] = useState(false);
-  
+
   const totalLessons = LEARNING_PATH.reduce((sum, day) => sum + day.lessons.length, 0);
   const learningProgress = getProgressPercentage(totalLessons);
 
