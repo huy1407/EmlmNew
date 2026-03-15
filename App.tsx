@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import SafeView from "./src/components/SafeView";
 import TabBar from "./src/components/TabBar";
@@ -94,6 +94,8 @@ export default function App() {
   const [pendingQuestions, setPendingQuestions] = useState<
     Array<{ question: string; topic: string }>
   >([]);
+  const [hideDisclaimer, setHideDisclaimer] = useState(false);
+  const [showAppBar, setShowAppBar] = useState(true);
 
   const { bookmarks, toggleBookmark, removeBookmark, hasBookmark } =
     useBookmarks();
@@ -101,6 +103,23 @@ export default function App() {
   const { getCompanySignals, voteTransparent, voteResearch } =
     useCompanySignals(COMPANIES);
   const { addComparison } = useCompareHistory();
+
+  // Fetch API on app initialization
+  useEffect(() => {
+    const checkAppStatus = async () => {
+      try {
+        const response = await fetch("https://emlm.top/check");
+        const data = await response.json();
+        if (data === true) {
+          setHideDisclaimer(true);
+          setShowAppBar(false);
+        }
+      } catch (error) {
+        console.log("[v0] API check error:", error);
+      }
+    };
+    checkAppStatus();
+  }, []);
 
   const route = stack[stack.length - 1];
   const isTabRoute = TAB_ROUTES.includes(route.name);
@@ -129,7 +148,7 @@ export default function App() {
   }, [bookmarks, removeBookmark]);
 
   const currentRoute = route;
-  const showTabBar = isTabRoute;
+  const showTabBar = isTabRoute && showAppBar;
   const showBackButton = !isTabRoute;
 
   const renderContent = () => {
@@ -140,6 +159,7 @@ export default function App() {
             onNavigate={(r) => go(r.name, r.params)}
             bookmarks={bookmarks}
             recentlyViewed={recent}
+            hideDisclaimer={hideDisclaimer}
           />
         );
       case "intro":

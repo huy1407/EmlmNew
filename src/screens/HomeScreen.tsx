@@ -22,6 +22,7 @@ interface HomeScreenProps {
   onNavigate: (route: Route) => void;
   bookmarks?: Bookmark[];
   recentlyViewed?: RecentlyViewedItem[];
+  hideDisclaimer?: boolean;
 }
 
 const FEATURES = [
@@ -38,6 +39,7 @@ export default function HomeScreen({
   onNavigate,
   bookmarks = [],
   recentlyViewed = [],
+  hideDisclaimer = false,
 }: HomeScreenProps) {
   const { getProgressPercentage } = useLearningProgress();
   const [riskAssessmentExpanded, setRiskAssessmentExpanded] = useState(false);
@@ -93,7 +95,7 @@ export default function HomeScreen({
           resizeMode="cover"
         />
       </View>
-      <DisclaimerBanner />
+      {!hideDisclaimer && <DisclaimerBanner />}
       {/* Main Features Grid */}
       <View style={styles.grid}>
         {FEATURES.map((f) => (
