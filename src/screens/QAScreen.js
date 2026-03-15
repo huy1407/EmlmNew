@@ -24,6 +24,8 @@ const stripHtmlTags = (html) => {
   if (!html) return '';
   return html
     .replace(/<[^>]*>/g, '')
+    .replace('<p>', '')
+    .replace('</p>', '')
     .replace(/&nbsp;/g, ' ')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
@@ -93,7 +95,7 @@ export default function QAModule({ onNavigate }) {
                 setDetailSearchText('');
               }}
             >
-              <Text style={styles.itemQuestion}>{originalIndex + 1}. {item.question}</Text>
+              <Text style={styles.itemQuestion}>{originalIndex + 1}. {stripHtmlTags(item.question)}</Text>
               <View style={styles.itemAnswerPreviewContainer}>
                 <RenderHTML
                   contentWidth={Dimensions.get('window').width - 64}
@@ -232,7 +234,7 @@ export default function QAModule({ onNavigate }) {
             <ScrollView style={styles.contentContainer} showsVerticalScrollIndicator={true}>
               <View style={styles.contentInner}>
                 <Text style={[styles.questionTitle, { fontSize: fontSize + 2, fontWeight: '700' }]}>
-                  {currentQuestion.question}
+                  {stripHtmlTags(currentQuestion.question)}
                 </Text>
 
                 <RenderHTML
