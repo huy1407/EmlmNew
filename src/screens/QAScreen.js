@@ -94,22 +94,37 @@ export default function QAModule({ onNavigate }) {
 
         <ScrollView style={styles.listContainer} showsVerticalScrollIndicator={false}>
           {filteredListData.map((item, index) => {
-            const answerPreview = stripHtmlTags(item.answer).substring(0, 100) + '...';
+            const originalIndex = qAndAData.indexOf(item);
             return (
               <TouchableOpacity
                 key={index}
                 style={styles.itemContainer}
                 onPress={() => {
-                  setCurrentQuestionIndex(qAndAData.indexOf(item));
+                  setCurrentQuestionIndex(originalIndex);
                   setCurrentScreen('detail');
                   setIsSearchOpen(false);
                   setDetailSearchText('');
                 }}
               >
-                <Text style={styles.itemQuestion}>{item.question}</Text>
-                <Text style={styles.itemAnswer} numberOfLines={2}>
-                  {answerPreview}
-                </Text>
+                <Text style={styles.itemQuestion}>{originalIndex + 1}. {item.question}</Text>
+                <View style={styles.itemAnswerPreviewContainer}>
+                  <RenderHTML
+                    contentWidth={Dimensions.get('window').width - 64}
+                    source={{ html: stripHtmlTags(item.answer).substring(0, 100) + '...' }}
+                    tagsStyles={{
+                      body: {
+                        fontSize: 13,
+                        lineHeight: 18,
+                        color: theme.colors.muted,
+                      },
+                      p: {
+                        fontSize: 13,
+                        lineHeight: 18,
+                        color: theme.colors.muted,
+                      },
+                    }}
+                  />
+                </View>
               </TouchableOpacity>
             );
           })}
@@ -211,7 +226,7 @@ export default function QAModule({ onNavigate }) {
 
               <View style={styles.navInfo}>
                 <Text style={styles.navTitle} numberOfLines={1}>
-                  {currentQuestion.question}
+                  Câu hỏi số {currentQuestionIndex + 1}
                 </Text>
                 <Text style={styles.navIndex}>
                   {currentQuestionIndex + 1} / {qAndAData.length}
@@ -451,6 +466,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: theme.colors.text,
     marginBottom: 6,
+  },
+  itemAnswerPreviewContainer: {
+    fontSize: 13,
+    color: theme.colors.muted,
+    lineHeight: 19,
   },
   itemAnswer: {
     fontSize: 13,
