@@ -8,7 +8,7 @@ import {
   Alert,
   Dimensions,
 } from "react-native";
-import { RenderHtml } from "react-native-render-html";
+import RenderHTML from "react-native-render-html";
 import type { RegulationSection } from "../types";
 import { theme } from "../styles/theme";
 
@@ -22,7 +22,7 @@ export default function RegulationSectionContent({
   fontSize,
 }: RegulationSectionContentProps) {
   const windowWidth = Dimensions.get("window").width;
-  
+
   const handleLinkPress = (url: string) => {
     Alert.alert(
       "Mở liên kết bên ngoài",
@@ -70,11 +70,11 @@ export default function RegulationSectionContent({
 
       <ScrollView style={styles.contentScroll}>
         {isHtml ? (
-          <RenderHtml
+          <RenderHTML
             contentWidth={windowWidth - 32}
-            html={section.content}
+            source={{html:section.content}}
             tagsStyles={tagsStyles}
-            onLinkPress={(evt, url) => handleLinkPress(url)}
+            //onLinkPress={(evt, url) => handleLinkPress(url)}
           />
         ) : (
           <Text style={[styles.plainText, { fontSize }]}>
@@ -89,7 +89,7 @@ export default function RegulationSectionContent({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    // backgroundColor: theme.colors.background,
   },
   sectionHeader: {
     paddingHorizontal: 16,

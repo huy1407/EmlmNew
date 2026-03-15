@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     borderTopWidth: 1,
     borderTopColor: theme.colors.border,
-    backgroundColor: theme.colors.background,
+    // backgroundColor: theme.colors.background,
   },
   floatingBtn: {
     paddingVertical: 12,
