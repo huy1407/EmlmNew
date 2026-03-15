@@ -17,121 +17,107 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '../styles/theme';
 import mockData from '../json/mockup.json';
 import BackButton from '@/src/components/BackButton';
+import ReaderFooter from '@/src/components/ReaderFooter';
 
-// HTML parser utility
+// Utility function to strip HTML tags
 const stripHtmlTags = (html) => {
   if (!html) return '';
   return html
-    .replace(/<[^>]*>/g, ' ')
+    .replace(/<[^>]*>/g, '')
     .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#039;/g, "'")
-    .replace(/\s+/g, ' ')
-    .trim();
+    .replace(/&amp;/g, '&');
 };
 
 export default function QAModule({ onNavigate }) {
-  const qAndAData = mockData.qAndA || [];
-
-  // All hooks at top level
-  const [currentScreen, setCurrentScreen] = useState('list'); // 'list' | 'detail' | 'question'
+  const [currentScreen, setCurrentScreen] = useState('list'); // 'list' | 'detail'
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [fontSize, setFontSize] = useState(14);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [listSearchText, setListSearchText] = useState('');
   const [detailSearchText, setDetailSearchText] = useState('');
-  const [questionText, setQuestionText] = useState('');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+  const qAndAData = mockData.qAndA || [];
   const currentQuestion = qAndAData[currentQuestionIndex];
 
-  // Filtered data for list screen
+  // Search functionality
   const filteredListData = useMemo(() => {
-    if (!listSearchText.trim()) return qAndAData;
-    const search = listSearchText.toLowerCase();
-    return qAndAData.filter((item) => {
-      const questionMatch = item.question.toLowerCase().includes(search);
-      const answerText = stripHtmlTags(item.answer).toLowerCase();
-      const answerMatch = answerText.includes(search);
-      return questionMatch || answerMatch;
-    });
-  }, [listSearchText]);
+    if (!listSearchText) return qAndAData;
+    const searchLower = listSearchText.toLowerCase();
+    return qAndAData.filter(
+      (item) =>
+        item.question.toLowerCase().includes(searchLower) ||
+        stripHtmlTags(item.answer).toLowerCase().includes(searchLower)
+    );
+  }, [listSearchText, qAndAData]);
+
+  const isFirstQuestion = currentQuestionIndex === 0;
+  const isLastQuestion = currentQuestionIndex === qAndAData.length - 1;
 
   // List Screen
-  const renderListScreen = () => {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.listHeader}>
-          <Pressable
-            style={styles.backBtn}
-            onPress={() => onNavigate({ name: 'home' })}
-          >
-            <Text style={styles.listHeaderTitle}>← </Text>
-          </Pressable>
-          <Text style={styles.listHeaderTitle}>Hỏi & đáp</Text>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => {
-              setQuestionText('');
-              setCurrentScreen('question');
-            }}
-          >
-            <MaterialCommunityIcons name="plus" size={24} color="white" />
-          </TouchableOpacity>
-        </View>
+  const renderListScreen = () => (
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.listHeader}>
+        <Pressable
+          style={styles.backBtn}
+          onPress={() => onNavigate({ name: 'home' })}
+        >
+          <Text style={styles.listHeaderTitle}>←</Text>
+        </Pressable>
+        <Text style={styles.listHeaderTitle}>Hỏi & đáp</Text>
+        <Text style={{ color: theme.colors.primary }}>X</Text>
+      </View>
 
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Tìm kiếm..."
-            placeholderTextColor={theme.colors.muted}
-            value={listSearchText}
-            onChangeText={setListSearchText}
-          />
-        </View>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Tìm kiếm..."
+          placeholderTextColor={theme.colors.muted}
+          value={listSearchText}
+          onChangeText={setListSearchText}
+        />
+      </View>
 
-        <ScrollView style={styles.listContainer} showsVerticalScrollIndicator={false}>
-          {filteredListData.map((item, index) => {
-            const originalIndex = qAndAData.indexOf(item);
-            return (
-              <TouchableOpacity
-                key={index}
-                style={styles.itemContainer}
-                onPress={() => {
-                  setCurrentQuestionIndex(originalIndex);
-                  setCurrentScreen('detail');
-                  setIsSearchOpen(false);
-                  setDetailSearchText('');
-                }}
-              >
-                <Text style={styles.itemQuestion}>{originalIndex + 1}. {item.question.replace('<p>','').replace('</p>','')}</Text>
-                <View style={styles.itemAnswerPreviewContainer}>
-                  <RenderHTML
-                    contentWidth={Dimensions.get('window').width - 64}
-                    source={{ html: stripHtmlTags(item.answer).substring(0, 100) + '...' }}
-                    tagsStyles={{
-                      body: {
-                        fontSize: 13,
-                        lineHeight: 18,
-                        color: theme.colors.muted,
-                      },
-                      p: {
-                        fontSize: 13,
-                        lineHeight: 18,
-                        color: theme.colors.muted,
-                      },
-                    }}
-                  />
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      </SafeAreaView>
-    );
-  };
+      <ScrollView style={styles.listContainer} showsVerticalScrollIndicator={false}>
+        {filteredListData.map((item, index) => {
+          const originalIndex = qAndAData.indexOf(item);
+          return (
+            <TouchableOpacity
+              key={index}
+              style={styles.itemContainer}
+              onPress={() => {
+                setCurrentQuestionIndex(originalIndex);
+                setCurrentScreen('detail');
+                setIsSearchOpen(false);
+                setDetailSearchText('');
+              }}
+            >
+              <Text style={styles.itemQuestion}>{originalIndex + 1}. {item.question}</Text>
+              <View style={styles.itemAnswerPreviewContainer}>
+                <RenderHTML
+                  contentWidth={Dimensions.get('window').width - 64}
+                  source={{ html: stripHtmlTags(item.answer).substring(0, 100) + '...' }}
+                  tagsStyles={{
+                    body: {
+                      fontSize: 13,
+                      lineHeight: 18,
+                      color: theme.colors.muted,
+                    },
+                    p: {
+                      fontSize: 13,
+                      lineHeight: 18,
+                      color: theme.colors.muted,
+                    },
+                  }}
+                />
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+    </SafeAreaView>
+  );
 
   // Detail Screen
   const renderDetailScreen = () => {
@@ -142,10 +128,6 @@ export default function QAModule({ onNavigate }) {
         </SafeAreaView>
       );
     }
-
-    const plainContent = stripHtmlTags(currentQuestion.answer);
-    const isFirstQuestion = currentQuestionIndex === 0;
-    const isLastQuestion = currentQuestionIndex === qAndAData.length - 1;
 
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -293,101 +275,23 @@ export default function QAModule({ onNavigate }) {
             </ScrollView>
 
             {/* Footer */}
-            <View style={styles.readerFooter}>
-              <View style={styles.fontSizeControls}>
-                <TouchableOpacity
-                  style={styles.fontButton}
-                  onPress={() => fontSize > 12 && setFontSize(fontSize - 1)}
-                >
-                  <Text style={styles.fontButtonTextSmall}>A</Text>
-                </TouchableOpacity>
-
-                <Text style={styles.fontSizeDisplay}>{fontSize}px</Text>
-
-                <TouchableOpacity
-                  style={styles.fontButton}
-                  onPress={() => fontSize < 24 && setFontSize(fontSize + 1)}
-                >
-                  <Text style={styles.fontButtonTextLarge}>A</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+            <ReaderFooter
+              fontSize={fontSize}
+              onIncreaseFontSize={() => fontSize < 24 && setFontSize(fontSize + 1)}
+              onDecreaseFontSize={() => fontSize > 12 && setFontSize(fontSize - 1)}
+              onAskQuestion={() => setCurrentScreen('list')}
+            />
           </>
         )}
       </SafeAreaView>
     );
   };
 
-  // Question Screen
-  const renderQuestionScreen = () => (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.questionHeader}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => setCurrentScreen('list')}
-        >
-          <MaterialCommunityIcons name="arrow-left" size={24} color="white" />
-        </TouchableOpacity>
-
-        <Text style={styles.questionHeaderTitle}>Gửi câu hỏi</Text>
-
-        <View style={{ width: 40 }} />
-      </View>
-
-      <ScrollView style={styles.questionContainer} showsVerticalScrollIndicator={false}>
-        <View style={styles.questionFormPadding}>
-          <Text style={styles.questionLabel}>Câu hỏi của bạn:</Text>
-
-          <TextInput
-            style={styles.questionInput}
-            placeholder="Nhập câu hỏi của bạn..."
-            placeholderTextColor={theme.colors.muted}
-            multiline
-            numberOfLines={6}
-            value={questionText}
-            onChangeText={setQuestionText}
-            textAlignVertical="top"
-          />
-
-          <Text style={styles.charCount}>
-            {questionText.length} / 500 ký tự
-          </Text>
-        </View>
-      </ScrollView>
-
-      <View style={styles.questionFooter}>
-        <TouchableOpacity
-          style={[styles.submitButton, !questionText.trim() && styles.submitButtonDisabled]}
-          onPress={() => {
-            if (!questionText.trim()) {
-              Alert.alert('Lỗi', 'Vui lòng nhập câu hỏi');
-              return;
-            }
-            Alert.alert('Thành công', 'Câu hỏi của bạn đã được gửi!', [
-              {
-                text: 'OK',
-                onPress: () => {
-                  setQuestionText('');
-                  setCurrentScreen('list');
-                },
-              },
-            ]);
-          }}
-          disabled={!questionText.trim()}
-        >
-          <MaterialCommunityIcons name="send" size={20} color="white" style={{ marginRight: 8 }} />
-          <Text style={styles.submitButtonText}>Gửi câu hỏi</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
-  );
-
   // Main render
   return (
     <View style={styles.container}>
       {currentScreen === 'list' && renderListScreen()}
       {currentScreen === 'detail' && renderDetailScreen()}
-      {currentScreen === 'question' && renderQuestionScreen()}
     </View>
   );
 }
@@ -395,44 +299,38 @@ export default function QAModule({ onNavigate }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.bg,
+    backgroundColor: theme.colors.background,
   },
   safeArea: {
     flex: 1,
-    backgroundColor: theme.colors.bg,
+    backgroundColor: 'white',
   },
 
   // List Screen Styles
   listHeader: {
-    backgroundColor: theme.colors.primary,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: '100%',
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 12,
   },
   backBtn: {
-    paddingRight: 8,
+    padding: 8,
   },
   listHeaderTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
     color: 'white',
-    flex: 1,
-    textAlign: 'center',
-  },
-  addButton: {
-    padding: 8,
-    marginLeft: 8,
   },
 
   searchContainer: {
+    backgroundColor: 'white',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
-    backgroundColor: 'white',
   },
   searchInput: {
     backgroundColor: theme.colors.inputBg,
@@ -445,9 +343,10 @@ const styles = StyleSheet.create({
 
   listContainer: {
     flex: 1,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     paddingVertical: 12,
   },
+
   itemContainer: {
     backgroundColor: 'white',
     borderRadius: 8,
@@ -468,11 +367,6 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   itemAnswerPreviewContainer: {
-    fontSize: 13,
-    color: theme.colors.muted,
-    lineHeight: 19,
-  },
-  itemAnswer: {
     fontSize: 13,
     color: theme.colors.muted,
     lineHeight: 19,
@@ -570,117 +464,5 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     marginBottom: 16,
     lineHeight: 24,
-  },
-  answerContent: {
-    color: theme.colors.text,
-    lineHeight: 21,
-  },
-
-  readerFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-    paddingVertical: 12,
-  },
-  fontSizeControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  fontButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: theme.colors.inputBg,
-    borderRadius: 6,
-  },
-  fontButtonTextSmall: {
-    fontSize: 12,
-    color: theme.colors.text,
-    fontWeight: '600',
-  },
-  fontButtonTextLarge: {
-    fontSize: 18,
-    color: theme.colors.text,
-    fontWeight: '600',
-  },
-  fontSizeDisplay: {
-    fontSize: 12,
-    color: theme.colors.muted,
-    fontWeight: '600',
-  },
-
-  // Question Screen Styles
-  questionHeader: {
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  questionHeaderTitle: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: '700',
-    color: 'white',
-    textAlign: 'center',
-  },
-
-  questionContainer: {
-    flex: 1,
-  },
-  questionFormPadding: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
-  },
-  questionLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: theme.colors.text,
-    marginBottom: 10,
-  },
-  questionInput: {
-    backgroundColor: theme.colors.inputBg,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    fontSize: 14,
-    color: theme.colors.text,
-    textAlignVertical: 'top',
-    minHeight: 120,
-    marginBottom: 8,
-  },
-  charCount: {
-    fontSize: 12,
-    color: theme.colors.muted,
-    textAlign: 'right',
-  },
-
-  questionFooter: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-    backgroundColor: 'white',
-  },
-  submitButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: theme.colors.primary,
-    borderRadius: 8,
-    paddingVertical: 12,
-  },
-  submitButtonDisabled: {
-    opacity: 0.6,
-  },
-  submitButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
   },
 });
