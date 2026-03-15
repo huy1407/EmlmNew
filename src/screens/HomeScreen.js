@@ -36,6 +36,13 @@ export default function HomeScreen({ navigateTo }) {
       color: theme.colors.orange,
       icon: "calculator-outline",
     },
+    {
+      title: "Tra cứu Văn bản Pháp luật",
+      desc: "Đọc các quy định về bán hàng đa cấp",
+      screen: "legal-document",
+      color: theme.colors.red,
+      icon: "file-document-outline",
+    },
   ];
 
   const gap = 12;

@@ -28,6 +28,7 @@ import RiskAssessmentScreen from "./src/screens/RiskAssessmentScreen";
 import LearningPathScreen from "./src/screens/LearningPathScreen";
 import CompanySelectScreen from "./src/screens/CompanySelectScreen";
 import CompanyCompareScreen from "./src/screens/CompanyCompareScreen";
+import LegalDocumentModule from "./src/screens/LegalDocumentScreen";
 
 import {
   KNOWLEDGE_ARTICLES,
@@ -343,6 +344,8 @@ export default function App() {
         );
       case "about":
         return <LegalScreen title="About App" content={ABOUT_CONTENT} />;
+      case "legal-document":
+        return <LegalDocumentModule />;
       default:
         return <HomeScreen onNavigate={(r) => go(r.name, r.params)} />;
     }
