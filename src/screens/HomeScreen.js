@@ -50,6 +50,20 @@ export default function HomeScreen({ navigateTo }) {
       color: theme.colors.primary,
       icon: "help-circle-outline",
     },
+    {
+      title: "Giới thiệu",
+      desc: "Thông tin về hoạt động bán hàng đa cấp",
+      screen: "about",
+      color: theme.colors.green,
+      icon: "information-outline",
+    },
+    {
+      title: "Lưu ý nhà phân phối",
+      desc: "Những điều cần biết khi bán hàng đa cấp",
+      screen: "distributor-notes",
+      color: theme.colors.orange,
+      icon: "alert-circle-outline",
+    },
   ];
 
   const gap = 12;

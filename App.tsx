@@ -27,6 +27,8 @@ import LearningPathScreen from "./src/screens/LearningPathScreen";
 import CompanySelectScreen from "./src/screens/CompanySelectScreen";
 import CompanyCompareScreen from "./src/screens/CompanyCompareScreen";
 import LegalDocumentModule from "./src/screens/LegalDocumentScreen";
+import AboutScreen from "./src/screens/AboutScreen";
+import DistributorNotesScreen from "./src/screens/DistributorNotesScreen";
 
 import {
   KNOWLEDGE_ARTICLES,
@@ -344,7 +346,9 @@ export default function App() {
           />
         );
       case "about":
-        return <LegalScreen title="About App" content={ABOUT_CONTENT} />;
+        return <AboutScreen onNavigate={(r) => go(r.name, r.params)} />;
+      case "distributor-notes":
+        return <DistributorNotesScreen onNavigate={(r) => go(r.name, r.params)} />;
       case "qa":
         return <QAModule  onNavigate={(r) => go(r.name, r.params)}/>;
       case "legal-document":
