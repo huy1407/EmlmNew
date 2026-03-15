@@ -49,8 +49,8 @@ import AskQuestionScreen from "@/src/screens/AskQuestionScreen";
 
 const TABS = [
   { key: "home", label: "Trang chủ" },
-  { key: "search", label: "Tìm kiếm" },
-  { key: "bookmarks", label: "Đã lưu" },
+  // { key: "search", label: "Tìm kiếm" },
+  // { key: "bookmarks", label: "Đã lưu" },
   { key: "settings", label: "Cài đặt" },
 ];
 
