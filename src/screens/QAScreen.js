@@ -106,7 +106,7 @@ export default function QAModule({ onNavigate }) {
                   setDetailSearchText('');
                 }}
               >
-                <Text style={styles.itemQuestion}>{originalIndex + 1}. {item.question}</Text>
+                <Text style={styles.itemQuestion}>{originalIndex + 1}. {item.question.replace('<p>','').replace('</p>','')}</Text>
                 <View style={styles.itemAnswerPreviewContainer}>
                   <RenderHTML
                     contentWidth={Dimensions.get('window').width - 64}
