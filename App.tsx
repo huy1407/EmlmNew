@@ -13,9 +13,7 @@ import RegulationDetailScreen from "./src/screens/RegulationDetailScreen";
 import RegulationQAScreen from "./src/screens/RegulationQAScreen";
 import CompanyListScreen from "./src/screens/CompanyListScreen";
 import CompanyDetailScreen from "./src/screens/CompanyDetailScreen";
-import QAListScreen from "./src/screens/QAListScreen";
-import QADetailScreen from "./src/screens/QADetailScreen";
-import AskQuestionScreen from "./src/screens/AskQuestionScreen";
+import QAModule from "./src/screens/QAScreen";
 import AlertListScreen from "./src/screens/AlertListScreen";
 import AlertDetailScreen from "./src/screens/AlertDetailScreen";
 import NewsListScreen from "./src/screens/NewsListScreen";
@@ -344,6 +342,8 @@ export default function App() {
         );
       case "about":
         return <LegalScreen title="About App" content={ABOUT_CONTENT} />;
+      case "qa":
+        return <QAModule />;
       case "legal-document":
         return <LegalDocumentModule />;
       default:

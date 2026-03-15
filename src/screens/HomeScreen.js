@@ -43,6 +43,13 @@ export default function HomeScreen({ navigateTo }) {
       color: theme.colors.red,
       icon: "file-document-outline",
     },
+    {
+      title: "Hỏi & đáp",
+      desc: "Các câu hỏi thường gặp về bán hàng đa cấp",
+      screen: "qa",
+      color: theme.colors.primary,
+      icon: "help-circle-outline",
+    },
   ];
 
   const gap = 12;
