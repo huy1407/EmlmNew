@@ -29,7 +29,7 @@ const stripHtmlTags = (html) => {
     .trim();
 };
 
-export default function QAModule() {
+export default function QAModule({onNavigate}) {
   const qAndAData = mockData.qAndA || [];
 
   // All hooks at top level - fixed!

@@ -43,6 +43,9 @@ import { useCompareHistory } from "./src/hooks/useCompareHistory";
 import type { Route, RouteName, BookmarkType } from "./src/types";
 import CompanyMLMListScreen from "@/src/screens/CompanyMLMListScreen";
 import CompanyMLMDetailScreen from "@/src/screens/CompanyMLMDetailScreen";
+import QAListScreen from "@/src/screens/QAListScreen";
+import QADetailScreen from "@/src/screens/QADetailScreen";
+import AskQuestionScreen from "@/src/screens/AskQuestionScreen";
 
 const TABS = [
   { key: "home", label: "Trang chủ" },
@@ -51,7 +54,7 @@ const TABS = [
   { key: "settings", label: "Cài đặt" },
 ];
 
-const TAB_ROUTES: RouteName[] = ["home", "search", "bookmarks", "settings"];
+const TAB_ROUTES: RouteName[] = ["home", "search", "bookmarks", "settings","legal-document"];
 
 const PRIVACY_CONTENT = `Chính sách bảo mật
 
@@ -84,7 +87,7 @@ Mục tiêu: Cung cấp thông tin tham khảo về kinh doanh đa cấp, giúp 
 Ứng dụng cộng đồng. Thông tin chỉ mang tính tham khảo.`;
 
 export default function App() {
-  const [stack, setStack] = useState<Route[]>([{ name: "home" }]);
+  const [stack, setStack] = useState<Route[]>([{ name: "home" },{ name: "legal-document" }]);
   const [pendingQuestions, setPendingQuestions] = useState<
     Array<{ question: string; topic: string }>
   >([]);
@@ -343,9 +346,9 @@ export default function App() {
       case "about":
         return <LegalScreen title="About App" content={ABOUT_CONTENT} />;
       case "qa":
-        return <QAModule />;
+        return <QAModule  onNavigate={(r) => go(r.name, r.params)}/>;
       case "legal-document":
-        return <LegalDocumentModule />;
+        return <LegalDocumentModule  onNavigate={(r) => go(r.name, r.params)}/>;
       default:
         return <HomeScreen onNavigate={(r) => go(r.name, r.params)} />;
     }

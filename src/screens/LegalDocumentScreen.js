@@ -8,7 +8,7 @@ import {
   TextInput,
   Alert,
   Share,
-  SafeAreaView,
+  SafeAreaView, Pressable,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '../styles/theme';
@@ -21,8 +21,9 @@ import { stripHtmlTags, searchInDocuments, formatContentForShare } from '../util
 import nghiDinh40 from '../json/nghiDinh40.json';
 import nghiDinh141 from '../json/nghiDinh141.json';
 import thongTu10 from '../json/thongTu10.json';
+import BackButton from "@/src/components/BackButton";
 
-export default function LegalDocumentModule() {
+export default function LegalDocumentModule({ onNavigate}) {
   const documents = [nghiDinh40, nghiDinh141, thongTu10];
 
   // Screen states
@@ -47,8 +48,14 @@ export default function LegalDocumentModule() {
   const renderListScreen = () => (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.listHeader}>
+        <Pressable
+            style={styles.backBtn}
+            onPress={() => onNavigate({ name: "home" })}
+        >
+          <Text style={styles.listHeaderTitle}>← </Text>
+        </Pressable>
         <Text style={styles.listHeaderTitle}>Tra cứu Văn bản Pháp luật</Text>
-        <Text style={styles.listHeaderSub}>Bán hàng Đa cấp</Text>
+        <Text style={{color:theme.colors.primary}}>X</Text>
       </View>
 
       <ScrollView style={styles.listContainer} showsVerticalScrollIndicator={false}>
@@ -310,9 +317,15 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     paddingVertical: 16,
     paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    alignSelf: 'center',
+    width:'100%',
+
   },
   listHeaderTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '700',
     color: 'white',
     marginBottom: 4,
