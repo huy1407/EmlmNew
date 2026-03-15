@@ -4,10 +4,11 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  View
+  View,
+  Image
 } from "react-native";
+import FeatureCardWithIcon from "../components/FeatureCardWithIcon";
 import BookmarksPreview from "../components/BookmarksPreview";
-import CardButton from "../components/CardButton";
 import CompanyCompareCard from "../components/CompanyCompareCard";
 import DisclaimerBanner from "../components/DisclaimerBanner";
 import LearningPathCard from "../components/LearningPathCard";
@@ -24,12 +25,12 @@ interface HomeScreenProps {
 }
 
 const FEATURES = [
-  { key: "about", title: "Giới thiệu" },
-  { key: "legal-document", title: "Pháp luật (tham khảo)" },
-  { key: "company-list", title: "Doanh nghiệp bán hàng đa cấp" },
-  { key: "qa", title: "Hỏi & đáp" },
-  { key: "news-list", title: "Tin tức" },
-  { key: "distributor-notes", title: "Lưu ý nhà phân phối" },
+  { key: "about", title: "Giới thiệu", icon: "information-outline" },
+  { key: "legal-document", title: "Pháp luật bán hàng đa cấp", icon: "scale-balance" },
+  { key: "company-list", title: "Doanh nghiệp bán hàng đa cấp", icon: "organization" },
+  { key: "qa", title: "Hỏi & đáp", icon: "help-circle-outline" },
+  { key: "distributor-notes", title: "Lưu ý", icon: "alert-circle-outline" },
+  { key: "news-list", title: "Tin tức", icon: "newspaper" },
 ];
 
 
@@ -84,9 +85,27 @@ export default function HomeScreen({
         <Text style={styles.appName}>eMLM</Text>
       </View>
 
-      <Pressable style={styles.searchBar} onPress={() => onNavigate({ name: "search" })}>
-        <Text style={styles.searchPlaceholder}>Tìm kiếm...</Text>
-      </Pressable>
+      {/* MLM Hero Image */}
+      <View style={styles.heroContainer}>
+        <Image
+          source={require("../../public/mlm-illustration.jpg")}
+          style={styles.heroImage}
+          resizeMode="cover"
+        />
+      </View>
+
+      {/* Main Features Grid */}
+      <View style={styles.grid}>
+        {FEATURES.map((f) => (
+          <View key={f.key} style={styles.gridItem}>
+            <FeatureCardWithIcon
+              title={f.title}
+              icon={f.icon}
+              onPress={() => onNavigate({ name: f.key as Route["name"] })}
+            />
+          </View>
+        ))}
+      </View>
 
       <DisclaimerBanner />
 
@@ -118,22 +137,6 @@ export default function HomeScreen({
         onItemPress={handleBookmarkItemPress}
         onViewAllPress={() => onNavigate({ name: "bookmarks" })}
       />
-
-      {/* Main Features Grid */}
-      <View style={styles.sectionLabel}>
-        <Text style={styles.sectionTitle}>Khám phá</Text>
-      </View>
-
-      <View style={styles.grid}>
-        {FEATURES.map((f) => (
-          <View key={f.key} style={styles.gridItem}>
-            <CardButton
-              title={f.title}
-              onPress={() => onNavigate({ name: f.key as Route["name"] })}
-            />
-          </View>
-        ))}
-      </View>
     </ScrollView>
   );
 }
@@ -142,32 +145,26 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { paddingBottom: 24 },
   header: { padding: 16 },
-  appName: { fontSize: 28, fontWeight: "700", color: "#111827" },
-  searchBar: {
-    marginHorizontal: 16,
-    marginBottom: 8,
-    padding: 12,
-    backgroundColor: "#fff",
+  appName: { fontSize: 28, fontWeight: "700", color: "#0066CC", textAlign: "center" },
+  heroContainer: {
+    marginHorizontal: 12,
+    marginBottom: 24,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
+    overflow: "hidden",
+    backgroundColor: "#f0f0f0",
+    height: 160,
   },
-  searchPlaceholder: { fontSize: 15, color: "#9CA3AF" },
-  sectionLabel: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginTop: 4,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
+  heroImage: {
+    width: "100%",
+    height: "100%",
   },
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
     paddingHorizontal: 12,
     gap: 12,
+    marginBottom: 24,
   },
-  gridItem: { width: "47%", flexGrow: 1 },
+  gridItem: { width: "48%", flexGrow: 1 },
 });
+
