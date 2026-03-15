@@ -1,92 +1,73 @@
 import React from "react";
-import { View, Text, ScrollView, StyleSheet } from "react-native";
-import FeatureCard from "../components/FeatureCard";
-import useResponsiveColumns from "../components/useResponsiveColumns";
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { theme } from "../styles/theme";
 
 export default function HomeScreen({ navigateTo }) {
-  const columns = useResponsiveColumns(768);
-
   const features = [
     {
-      title: "Khai báo DN Đa cấp",
-      desc: "Thu thập và đánh giá thông tin",
-      screen: "company-form",
-      color: theme.colors.primary,
-      icon: "business-outline",
-    },
-    {
-      title: "Danh sách DN",
-      desc: "Xem các doanh nghiệp đã khai báo",
-      screen: "company-list",
-      color: theme.colors.green,
-      icon: "document-text-outline",
-    },
-    {
-      title: "Case Study",
-      desc: "Học từ tình huống thực tế",
-      screen: "case-study",
-      color: theme.colors.purple,
-      icon: "book-outline",
-    },
-    {
-      title: "Mô phỏng Thu nhập",
-      desc: "Tính toán lợi nhuận thực tế",
-      screen: "calculator",
-      color: theme.colors.orange,
-      icon: "calculator-outline",
-    },
-    {
-      title: "Tra cứu Văn bản Pháp luật",
-      desc: "Đọc các quy định về bán hàng đa cấp",
-      screen: "legal-document",
-      color: theme.colors.red,
-      icon: "file-document-outline",
-    },
-    {
-      title: "Hỏi & đáp",
-      desc: "Các câu hỏi thường gặp về bán hàng đa cấp",
-      screen: "qa",
-      color: theme.colors.primary,
-      icon: "help-circle-outline",
-    },
-    {
       title: "Giới thiệu",
-      desc: "Thông tin về hoạt động bán hàng đa cấp",
       screen: "about",
-      color: theme.colors.green,
       icon: "information-outline",
     },
     {
-      title: "Lưu ý nhà phân phối",
-      desc: "Những điều cần biết khi bán hàng đa cấp",
+      title: "Pháp luật bán hàng đa cấp",
+      screen: "legal-document",
+      icon: "scale-balance",
+    },
+    {
+      title: "Doanh nghiệp bán hàng đa cấp",
+      screen: "company-list",
+      icon: "organization",
+    },
+    {
+      title: "Hỏi & đáp",
+      screen: "qa",
+      icon: "help-circle-outline",
+    },
+    {
+      title: "Lưu ý",
       screen: "distributor-notes",
-      color: theme.colors.orange,
       icon: "alert-circle-outline",
+    },
+    {
+      title: "Tin tức",
+      screen: "news",
+      icon: "newspaper",
     },
   ];
 
-  const gap = 12;
-  const cardWidth = columns === 2 ? "48.5%" : "100%";
-
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.heroCard}>
-        <Text style={styles.heroTitle}>eMLM Plus</Text>
-        <Text style={styles.heroSub}>Công cụ đánh giá doanh nghiệp đa cấp</Text>
+    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Header */}
+      <Text style={styles.headerTitle}>eMLM</Text>
+
+      {/* Hero Image */}
+      <View style={styles.heroContainer}>
+        <Image
+          source={require("../../public/mlm-illustration.jpg")}
+          style={styles.heroImage}
+          resizeMode="cover"
+        />
       </View>
 
-      <View style={[styles.grid, { gap }]}>
+      {/* Feature Grid */}
+      <View style={styles.grid}>
         {features.map((f, idx) => (
-          <View key={idx} style={{ width: cardWidth }}>
-            <FeatureCard
-              title={f.title}
-              desc={f.desc}
-              icon={f.icon}
-              color={f.color}
-              onPress={() => navigateTo(f.screen)}
+          <TouchableOpacity
+            key={idx}
+            style={styles.featureCard}
+            onPress={() => navigateTo(f.screen)}
+            activeOpacity={0.8}
+          >
+            <MaterialCommunityIcons
+              name={f.icon}
+              size={48}
+              color="white"
+              style={styles.featureIcon}
             />
-          </View>
+            <Text style={styles.featureTitle}>{f.title}</Text>
+          </TouchableOpacity>
         ))}
       </View>
     </ScrollView>
@@ -94,19 +75,51 @@ export default function HomeScreen({ navigateTo }) {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 16, paddingBottom: 28, gap: 10 },
-  heroCard: {
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.radius.xl,
-    padding: 20,
-    ...theme.shadow,
+  container: {
+    paddingBottom: 32,
   },
-  heroTitle: { fontSize: 28, fontWeight: "900", color: theme.colors.text },
-  heroSub: { marginTop: 6, color: theme.colors.muted },
+  headerTitle: {
+    fontSize: 32,
+    fontWeight: "700",
+    color: theme.colors.primary,
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  heroContainer: {
+    marginHorizontal: 12,
+    marginBottom: 24,
+    borderRadius: 12,
+    overflow: "hidden",
+    backgroundColor: "#f0f0f0",
+    height: 160,
+  },
+  heroImage: {
+    width: "100%",
+    height: "100%",
+  },
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
-    marginTop: 12,
+    paddingHorizontal: 12,
+    gap: 12,
+  },
+  featureCard: {
+    width: "48%",
+    aspectRatio: 1,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  featureIcon: {
+    marginBottom: 12,
+  },
+  featureTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "white",
+    textAlign: "center",
+    lineHeight: 18,
   },
 });
