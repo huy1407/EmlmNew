@@ -57,9 +57,28 @@ export default function QAModule() {
   const renderListScreen = () => {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.listHeader}>
-          <Text style={styles.listHeaderTitle}>Hỏi & đáp</Text>
-          <Text style={styles.listHeaderSub}>Câu hỏi thường gặp</Text>
+        <View style={styles.readerHeader}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => {
+              // Go back to main app
+            }}
+          >
+            <MaterialCommunityIcons name="arrow-left" size={24} color="white" />
+          </TouchableOpacity>
+
+          <Text style={styles.readerHeaderTitle} numberOfLines={1}>
+            Hỏi & đáp
+          </Text>
+
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => {
+              setCurrentScreen('question');
+            }}
+          >
+            <MaterialCommunityIcons name="plus" size={24} color="white" />
+          </TouchableOpacity>
         </View>
 
         <View style={styles.searchContainer}>
@@ -314,22 +333,28 @@ const styles = StyleSheet.create({
   },
 
   // List Screen Styles
-  listHeader: {
+  readerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: theme.colors.primary,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
   },
-  listHeaderTitle: {
-    fontSize: 24,
+  backButton: {
+    padding: 8,
+    marginRight: 8,
+  },
+  readerHeaderTitle: {
+    flex: 1,
+    fontSize: 18,
     fontWeight: '700',
     color: 'white',
-    marginBottom: 2,
+    textAlign: 'center',
   },
-  listHeaderSub: {
-    fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.8)',
-    marginBottom: 12,
+  addButton: {
+    padding: 8,
+    marginLeft: 8,
   },
 
   searchContainer: {
