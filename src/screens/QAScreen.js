@@ -10,7 +10,9 @@ import {
   Share,
   SafeAreaView,
   Pressable,
+  Dimensions,
 } from 'react-native';
+import RenderHTML from 'react-native-render-html';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { theme } from '../styles/theme';
 import mockData from '../json/mockup.json';
@@ -160,7 +162,7 @@ export default function QAModule({ onNavigate }) {
             <TouchableOpacity
               style={styles.headerIconButton}
               onPress={() => {
-                const content = `${currentQuestion.question}\n\n${plainContent}`;
+                const content = `${currentQuestion.question}\n\n${stripHtmlTags(currentQuestion.answer)}`;
                 Share.share({
                   message: content,
                   title: 'Chia sẻ câu hỏi',
@@ -236,14 +238,42 @@ export default function QAModule({ onNavigate }) {
                   {currentQuestion.question}
                 </Text>
 
-                <Text
-                  style={[
-                    styles.answerContent,
-                    { fontSize: fontSize, lineHeight: fontSize * 1.6 },
-                  ]}
-                >
-                  {plainContent}
-                </Text>
+                <RenderHTML
+                  contentWidth={Dimensions.get('window').width - 32}
+                  source={{ html: currentQuestion.answer }}
+                  tagsStyles={{
+                    body: {
+                      fontSize: fontSize,
+                      lineHeight: fontSize * 1.6,
+                      color: theme.colors.text,
+                    },
+                    p: {
+                      marginVertical: 8,
+                      fontSize: fontSize,
+                      lineHeight: fontSize * 1.6,
+                      color: theme.colors.text,
+                    },
+                    strong: {
+                      fontWeight: '700',
+                      fontSize: fontSize,
+                      color: theme.colors.text,
+                    },
+                    em: {
+                      fontStyle: 'italic',
+                      fontSize: fontSize,
+                      color: theme.colors.text,
+                    },
+                    ul: {
+                      marginVertical: 8,
+                    },
+                    li: {
+                      marginVertical: 4,
+                      fontSize: fontSize,
+                      lineHeight: fontSize * 1.6,
+                      color: theme.colors.text,
+                    },
+                  }}
+                />
               </View>
             </ScrollView>
 
