@@ -188,10 +188,10 @@ export default function RegulationQAScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor:  theme.colors.primary,
   },
   header: {
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,

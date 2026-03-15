@@ -144,7 +144,7 @@ export default function CompanyMLMDetailScreen({
       setComplaintSubmitting(true);
       setComplaintSubmitError(null);
       await submitComplaint(company?.id || "", complaintFormName, complaintFormEmail, complaintFormContent);
-      
+
       // Success - show alert and clear form
       Alert.alert("Thành công", "Khiếu nại của bạn đã được gửi. Cảm ơn bạn đã phản hồi!");
       setComplaintFormName("");
@@ -197,7 +197,7 @@ export default function CompanyMLMDetailScreen({
             </View>
           </View>
           <View style={styles.divider} />
-          
+
           <View style={styles.infoRow}>
             <View style={styles.infoColumn}>
               <Text style={styles.infoLabel}>Hotline</Text>
@@ -209,7 +209,7 @@ export default function CompanyMLMDetailScreen({
             </View>
           </View>
           <View style={styles.divider} />
-          
+
           <View style={styles.infoRow}>
             <View style={styles.infoColumn}>
               <Text style={styles.infoLabel}>Email</Text>
@@ -221,7 +221,7 @@ export default function CompanyMLMDetailScreen({
         {/* Business Registration Section */}
         <View style={[styles.infoGroup, { marginTop: 16 }]}>
           <Text style={styles.sectionSubtitle}>GCN đăng ký doanh nghiệp/đầu tư</Text>
-          
+
           <View style={styles.infoRow}>
             <View style={styles.infoColumn}>
               <Text style={styles.infoLabel}>Số đăng ký</Text>
@@ -233,7 +233,7 @@ export default function CompanyMLMDetailScreen({
             </View>
           </View>
           <View style={styles.divider} />
-          
+
           <View style={styles.infoRow}>
             <View style={styles.infoColumn}>
               <Text style={styles.infoLabel}>Ngày sửa đổi</Text>
@@ -245,7 +245,7 @@ export default function CompanyMLMDetailScreen({
         {/* Activity Certificate Section */}
         <View style={[styles.infoGroup, { marginTop: 16 }]}>
           <Text style={styles.sectionSubtitle}>GCN đăng ký hoạt động BHĐC</Text>
-          
+
           <View style={styles.infoRow}>
             <View style={styles.infoColumn}>
               <Text style={styles.infoLabel}>Số đăng ký</Text>
@@ -257,7 +257,7 @@ export default function CompanyMLMDetailScreen({
             </View>
           </View>
           <View style={styles.divider} />
-          
+
           <View style={styles.infoRow}>
             <View style={styles.infoColumn}>
               <Text style={styles.infoLabel}>Ngày sửa đổi bổ sung</Text>
@@ -273,7 +273,7 @@ export default function CompanyMLMDetailScreen({
         {/* Representative Section */}
         <View style={[styles.infoGroup, { marginTop: 16 }]}>
           <Text style={styles.sectionSubtitle}>Người đại diện theo pháp luật</Text>
-          
+
           <View style={styles.infoRow}>
             <View style={styles.infoColumn}>
               <Text style={styles.infoLabel}>Họ tên</Text>
@@ -285,7 +285,7 @@ export default function CompanyMLMDetailScreen({
             </View>
           </View>
           <View style={styles.divider} />
-          
+
           <View style={styles.infoRow}>
             <View style={styles.infoColumn}>
               <Text style={styles.infoLabel}>Chức vụ</Text>
@@ -564,7 +564,16 @@ export default function CompanyMLMDetailScreen({
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <DisclaimerBanner />
+      <View style={styles.listHeader}>
+        <Pressable
+            style={styles.backBtn}
+            onPress={onBack}
+        >
+          <Text style={styles.listHeaderTitle}>←</Text>
+        </Pressable>
+        <Text style={styles.listHeaderTitle}>Doanh nghiệp bán hàng đa cấp</Text>
+        <Text style={{ color: theme.colors.primary }}>X</Text>
+      </View>
 
       {isLoading && (
         <View style={styles.loadingIndicator}>
@@ -633,12 +642,12 @@ export default function CompanyMLMDetailScreen({
               onPress={() => {
                 const newSection = expandedSection === section.id ? null : section.id;
                 setExpandedSection(newSection);
-                
+
                 // Load HoSo data when expanding that section
                 if (newSection === "hoSoCapNhat" && company?.id && hoSoData.length === 0) {
                   loadCompanyHoSo(company.id);
                 }
-                
+
                 // Load Agency data when expanding that section
                 if (newSection === "truSoChiNhanh" && company?.id && agencyData.length === 0) {
                   loadCompanyAgency(company.id);
@@ -716,6 +725,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
+  listHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 8,
+  },
+  backBtn: {
+    padding: 8,
+  },
+  listHeaderTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: 'white',
+  },
+
   content: {
     paddingBottom: 32,
   },

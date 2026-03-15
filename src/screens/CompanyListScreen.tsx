@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { View, FlatList, TextInput, StyleSheet } from "react-native";
+import {View, FlatList, TextInput, StyleSheet, Pressable, Text} from "react-native";
 import ListItemRow from "../components/ListItemRow";
 import DisclaimerBanner from "../components/DisclaimerBanner";
 import SectionHeader from "../components/SectionHeader";
@@ -29,7 +29,7 @@ export default function CompanyListScreen({
 
   return (
     <View style={styles.container}>
-      <DisclaimerBanner />
+
       <TextInput
         style={styles.search}
         placeholder="Tìm doanh nghiệp..."
@@ -72,4 +72,22 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
   },
   empty: { padding: 16 },
+    listHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: theme.colors.primary,
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        paddingBottom: 12,
+    },
+    backBtn: {
+        padding: 8,
+    },
+    listHeaderTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: 'white',
+    },
+
 });

@@ -8,7 +8,7 @@ export default function BackButton({ onPress, label = "Quay lại" }) {
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.85}
-      style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}
+      style={{ flexDirection: "row", alignItems: "center", marginBottom: 10,backgroundColor: theme.colors.primary }}
     >
       <Ionicons name="chevron-back" size={18} color={theme.colors.primary} />
       <Text style={{ color: theme.colors.primary, fontWeight: "800" }}>

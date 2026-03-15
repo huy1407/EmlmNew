@@ -315,8 +315,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: theme.colors.primary,
     paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
+    paddingTop: 8,
+    paddingBottom: 8,
   },
   backBtn: {
     padding: 8,

@@ -27,7 +27,7 @@ interface HomeScreenProps {
 const FEATURES = [
   { key: "about", title: "Giới thiệu", icon: "information-outline" },
   { key: "legal-document", title: "Pháp luật bán hàng đa cấp", icon: "scale-balance" },
-  { key: "company-list", title: "Doanh nghiệp bán hàng đa cấp", icon: "organization" },
+  { key: "company-list", title: "Doanh nghiệp bán hàng đa cấp", icon: "bookmark" },
   { key: "qa", title: "Hỏi & đáp", icon: "help-circle-outline" },
   { key: "distributor-notes", title: "Lưu ý", icon: "alert-circle-outline" },
   { key: "news-list", title: "Tin tức", icon: "newspaper" },
@@ -93,7 +93,7 @@ export default function HomeScreen({
           resizeMode="cover"
         />
       </View>
-
+      <DisclaimerBanner />
       {/* Main Features Grid */}
       <View style={styles.grid}>
         {FEATURES.map((f) => (
@@ -107,36 +107,6 @@ export default function HomeScreen({
         ))}
       </View>
 
-      <DisclaimerBanner />
-
-      {/* Risk Assessment Widget - Inline */}
-      <RiskAssessmentWidget
-        isExpanded={riskAssessmentExpanded}
-        onToggleExpand={setRiskAssessmentExpanded}
-      />
-
-      {/* Learning Path Card */}
-      <LearningPathCard
-        progress={learningProgress}
-        onPress={() => onNavigate({ name: "learning-path" })}
-      />
-
-      {/* Company Compare Card */}
-      <CompanyCompareCard onPress={() => onNavigate({ name: "company-select" })} />
-
-      {/* Recently Viewed Preview */}
-      <RecentlyViewedPreview
-        items={recentlyViewed}
-        onItemPress={handleRecentItemPress}
-        onViewAllPress={() => onNavigate({ name: "bookmarks" })}
-      />
-
-      {/* Bookmarks Preview */}
-      <BookmarksPreview
-        bookmarks={bookmarks}
-        onItemPress={handleBookmarkItemPress}
-        onViewAllPress={() => onNavigate({ name: "bookmarks" })}
-      />
     </ScrollView>
   );
 }

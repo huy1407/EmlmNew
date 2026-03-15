@@ -48,6 +48,7 @@ import CompanyMLMDetailScreen from "@/src/screens/CompanyMLMDetailScreen";
 import QAListScreen from "@/src/screens/QAListScreen";
 import QADetailScreen from "@/src/screens/QADetailScreen";
 import AskQuestionScreen from "@/src/screens/AskQuestionScreen";
+import {theme} from "@/src/styles/theme";
 
 const TABS = [
   { key: "home", label: "Trang chủ" },
@@ -56,7 +57,7 @@ const TABS = [
   { key: "settings", label: "Cài đặt" },
 ];
 
-const TAB_ROUTES: RouteName[] = ["home", "search", "bookmarks", "settings","legal-document","qa","about","distributor-notes"];
+const TAB_ROUTES: RouteName[] = ["home", "search", "bookmarks", "settings","legal-document","qa","about","distributor-notes","company-list","company-detail","news-list"];
 
 const PRIVACY_CONTENT = `Chính sách bảo mật
 
@@ -89,7 +90,7 @@ Mục tiêu: Cung cấp thông tin tham khảo về kinh doanh đa cấp, giúp 
 Ứng dụng cộng đồng. Thông tin chỉ mang tính tham khảo.`;
 
 export default function App() {
-  const [stack, setStack] = useState<Route[]>([{ name: "home" },{ name: "legal-document" }]);
+  const [stack, setStack] = useState<Route[]>([{ name: "home" }]);
   const [pendingQuestions, setPendingQuestions] = useState<
     Array<{ question: string; topic: string }>
   >([]);
@@ -391,7 +392,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: "#E5E7EB",
-    backgroundColor: "#fff",
+    backgroundColor:  theme.colors.primary,
+
   },
   content: { flex: 1 },
 });

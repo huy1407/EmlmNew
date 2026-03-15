@@ -8,7 +8,7 @@ import {
   Image,
   StyleSheet,
   RefreshControl,
-  ScrollView,
+  ScrollView,Pressable, Text
 } from "react-native";
 import ListItemRow from "../components/ListItemRow";
 import SkeletonLoader from "../components/SkeletonLoader";
@@ -152,7 +152,6 @@ export default function NewsListScreen({
   if (isLoading && news?.length === 0) {
     return (
       <View style={{ flex: 1 }}>
-        <DisclaimerBanner />
         <ScrollView
           style={{ flex: 1 }}
           refreshControl={
@@ -176,11 +175,20 @@ export default function NewsListScreen({
 
   return (
     <View style={{ flex: 1 }}>
-      <DisclaimerBanner />
+      <View style={styles.listHeader}>
+        <Pressable
+            style={styles.backBtn}
+            onPress={() => onNavigate({ name: 'home' })}
+        >
+          <Text style={styles.listHeaderTitle}>←</Text>
+        </Pressable>
+        <Text style={styles.listHeaderTitle}>Tin tức</Text>
+        <Text style={{ color: theme.colors.primary }}>X</Text>
+      </View>
       <FlatList
         data={filteredNews}
         keyExtractor={(item) => item.id}
-        ListHeaderComponent={renderHeader}
+        // ListHeaderComponent={renderHeader}
         renderItem={({ item }) => (
           <ListItemRow
             title={item.title}
@@ -222,6 +230,23 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#E5E7EB",
+  },
+  listHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 8,
+  },
+  backBtn: {
+    padding: 8,
+  },
+  listHeaderTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: 'white',
   },
   headerTitleContainer: {
     flexDirection: "row",

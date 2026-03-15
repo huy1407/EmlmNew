@@ -7,7 +7,7 @@ import {
   TextInput,
   ActivityIndicator,
   RefreshControl,
-  StyleSheet,
+  StyleSheet, Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import CompanyMLMItem from "../components/CompanyMLMItem";
@@ -82,7 +82,16 @@ export default function CompanyMLMListScreen({
 
   const renderHeader = () => (
     <>
-      <SectionHeader title="Doanh nghiệp bán hàng đa cấp" />
+      <View style={styles.listHeader}>
+        <Pressable
+            style={styles.backBtn}
+            onPress={() => onNavigate({ name: 'home' })}
+        >
+          <Text style={styles.listHeaderTitle}>←</Text>
+        </Pressable>
+        <Text style={styles.listHeaderTitle}>Doanh nghiệp bán hàng đa cấp</Text>
+        <Text style={{ color: theme.colors.primary }}>X</Text>
+      </View>
       <View style={styles.searchContainer}>
         <Ionicons
           name="search"
@@ -105,7 +114,6 @@ export default function CompanyMLMListScreen({
   if (isLoading && companies.length === 0) {
     return (
       <View style={styles.container}>
-        <DisclaimerBanner />
         <ScrollView
           style={styles.container}
           refreshControl={
@@ -127,7 +135,6 @@ export default function CompanyMLMListScreen({
   if (error && companies.length === 0) {
     return (
       <View style={styles.container}>
-        <DisclaimerBanner />
         <ScrollView
           style={styles.container}
           refreshControl={
@@ -156,7 +163,6 @@ export default function CompanyMLMListScreen({
 
   return (
     <View style={styles.container}>
-      <DisclaimerBanner />
       <FlatList
         data={filteredCompanies}
         keyExtractor={(item) => item.id}
@@ -217,6 +223,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
+  listHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 8,
+  },
+  backBtn: {
+    padding: 8,
+  },
+  listHeaderTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: 'white',
+  },
+
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",

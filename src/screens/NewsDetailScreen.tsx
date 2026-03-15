@@ -56,7 +56,6 @@ export default function NewsDetailScreen({ id, onViewDetail }: NewsDetailScreenP
   if (!newsDetail) {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <DisclaimerBanner />
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>Không tìm thấy tin tức</Text>
         </View>
@@ -91,7 +90,6 @@ export default function NewsDetailScreen({ id, onViewDetail }: NewsDetailScreenP
   }
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <DisclaimerBanner />
       {isLoading && (
         <View style={styles.loadingIndicator}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
