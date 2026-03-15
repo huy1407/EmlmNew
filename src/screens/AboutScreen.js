@@ -5,7 +5,7 @@ import {
   Text,
   StyleSheet,
   SafeAreaView,
-  Dimensions,
+  Dimensions, Pressable,
 } from 'react-native';
 import RenderHTML from 'react-native-render-html';
 import { theme } from '../styles/theme';
@@ -25,7 +25,7 @@ const stripHtmlTags = (html) => {
 
 export default function AboutScreen({ onNavigate }) {
   const [fontSize, setFontSize] = useState(14);
-  
+
   const aboutContent = mockData.aboutUs || '';
 
   const handleIncreaseFontSize = () => {
@@ -39,11 +39,14 @@ export default function AboutScreen({ onNavigate }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.readerHeader}>
-        <BackButton onPress={() => onNavigate({ name: 'home' })} />
-        <Text style={styles.readerHeaderTitle} numberOfLines={1}>
-          Giới thiệu
-        </Text>
-        <View style={styles.headerSpacer} />
+        <Pressable
+            style={styles.backBtn}
+            onPress={() => onNavigate({ name: "home" })}
+        >
+          <Text style={styles.listHeaderTitle}>← </Text>
+        </Pressable>
+        <Text style={styles.listHeaderTitle}>  Giới thiệu</Text>
+        <Text style={{color:theme.colors.primary}}>X</Text>
       </View>
 
       {/* Content */}
@@ -101,6 +104,23 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: theme.colors.bg,
+  },
+  listHeader: {
+    backgroundColor: theme.colors.primary,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    alignSelf: 'center',
+    width:'100%',
+
+  },
+  listHeaderTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: 'white',
+    marginBottom: 4,
   },
   readerHeader: {
     flexDirection: 'row',

@@ -56,7 +56,7 @@ const TABS = [
   { key: "settings", label: "Cài đặt" },
 ];
 
-const TAB_ROUTES: RouteName[] = ["home", "search", "bookmarks", "settings","legal-document","qa"];
+const TAB_ROUTES: RouteName[] = ["home", "search", "bookmarks", "settings","legal-document","qa","about","distributor-notes"];
 
 const PRIVACY_CONTENT = `Chính sách bảo mật
 

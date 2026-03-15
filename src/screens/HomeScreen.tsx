@@ -24,13 +24,12 @@ interface HomeScreenProps {
 }
 
 const FEATURES = [
-  { key: "knowledge-list", title: "Kiến thức MLM" },
+  { key: "about", title: "Giới thiệu" },
   { key: "legal-document", title: "Pháp luật (tham khảo)" },
   { key: "company-list", title: "Doanh nghiệp bán hàng đa cấp" },
   { key: "qa", title: "Hỏi & đáp" },
-  { key: "alert-list", title: "Cảnh báo" },
   { key: "news-list", title: "Tin tức" },
-  { key: "risk-assessment", title: "Tự đánh giá rủi ro" },
+  { key: "distributor-notes", title: "Lưu ý nhà phân phối" },
 ];
 
 

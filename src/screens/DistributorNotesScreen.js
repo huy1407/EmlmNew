@@ -6,7 +6,7 @@ import {
   StyleSheet,
   SafeAreaView,
   TouchableOpacity,
-  Dimensions,
+  Dimensions, Pressable,
 } from 'react-native';
 import RenderHTML from 'react-native-render-html';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -28,20 +28,20 @@ const stripHtmlTags = (html) => {
 const AccordionItem = ({ title, content, isExpanded, onToggle, fontSize }) => {
   return (
     <View style={styles.accordionItem}>
-      <TouchableOpacity 
-        style={styles.accordionHeader} 
+      <TouchableOpacity
+        style={styles.accordionHeader}
         onPress={onToggle}
       >
         <Text style={[styles.accordionTitle, { fontSize: fontSize + 1 }]} numberOfLines={isExpanded ? undefined : 2}>
           {stripHtmlTags(title)}
         </Text>
-        <MaterialCommunityIcons 
-          name={isExpanded ? 'chevron-up' : 'chevron-down'} 
-          size={24} 
+        <MaterialCommunityIcons
+          name={isExpanded ? 'chevron-up' : 'chevron-down'}
+          size={24}
           color={theme.colors.primary}
         />
       </TouchableOpacity>
-      
+
       {isExpanded && (
         <View style={styles.accordionContent}>
           <RenderHTML
@@ -95,7 +95,7 @@ const AccordionItem = ({ title, content, isExpanded, onToggle, fontSize }) => {
 export default function DistributorNotesScreen({ onNavigate }) {
   const [fontSize, setFontSize] = useState(14);
   const [expandedItems, setExpandedItems] = useState([]);
-  
+
   const { header = '', list = [] } = mockData.luuYNhaPhanPhoi || {};
 
   const handleIncreaseFontSize = () => {
@@ -119,11 +119,14 @@ export default function DistributorNotesScreen({ onNavigate }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.readerHeader}>
-        <BackButton onPress={() => onNavigate({ name: 'home' })} />
-        <Text style={styles.readerHeaderTitle} numberOfLines={1}>
-          Lưu ý
-        </Text>
-        <View style={styles.headerSpacer} />
+        <Pressable
+            style={styles.backBtn}
+            onPress={() => onNavigate({ name: "home" })}
+        >
+          <Text style={styles.listHeaderTitle}>← </Text>
+        </Pressable>
+        <Text style={styles.listHeaderTitle}>Lưu ý</Text>
+        <Text style={{color:theme.colors.primary}}>X</Text>
       </View>
 
       {/* Content */}
@@ -179,13 +182,6 @@ export default function DistributorNotesScreen({ onNavigate }) {
       </ScrollView>
 
       {/* Footer */}
-      <ReaderFooter
-        fontSize={fontSize}
-        onIncrease={handleIncreaseFontSize}
-        onDecrease={handleDecreaseFontSize}
-        isIncreaseDisabled={fontSize >= 24}
-        isDecreaseDisabled={fontSize <= 12}
-      />
     </SafeAreaView>
   );
 }
@@ -194,6 +190,23 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: theme.colors.bg,
+  },
+  listHeader: {
+    backgroundColor: theme.colors.primary,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    alignSelf: 'center',
+    width:'100%',
+
+  },
+  listHeaderTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: 'white',
+    marginBottom: 4,
   },
   readerHeader: {
     flexDirection: 'row',
