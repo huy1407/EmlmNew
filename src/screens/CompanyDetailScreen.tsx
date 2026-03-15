@@ -137,6 +137,51 @@ export default function CompanyDetailScreen({
       {/*  </Pressable>*/}
       {/*)}*/}
 
+      {/* Metadata from Official Registry */}
+      {company.metadata && Object.keys(company.metadata).length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Thông tin đăng ký chính thức</Text>
+          {company.metadata.gcndkdn && (
+            <View style={styles.metadataItem}>
+              <Text style={styles.metadataLabel}>Số GCNĐKDN</Text>
+              <Text style={styles.metadataValue}>{company.metadata.gcndkdn}</Text>
+            </View>
+          )}
+          {company.metadata.gcndkhd && (
+            <View style={styles.metadataItem}>
+              <Text style={styles.metadataLabel}>Số GCNĐKHĐ</Text>
+              <Text style={styles.metadataValue}>{company.metadata.gcndkhd}</Text>
+            </View>
+          )}
+          {company.metadata.nguoiDaiDienPL && (
+            <View style={styles.metadataItem}>
+              <Text style={styles.metadataLabel}>Đại diện pháp lý</Text>
+              <Text style={styles.metadataValue}>{company.metadata.nguoiDaiDienPL}</Text>
+            </View>
+          )}
+          {company.metadata.tinhTrang && (
+            <View style={styles.metadataItem}>
+              <Text style={styles.metadataLabel}>Tình trạng</Text>
+              <Text style={[styles.metadataValue, company.metadata.tinhTrang === "Đang hoạt động" ? styles.activeStatus : styles.inactiveStatus]}>
+                {company.metadata.tinhTrang}
+              </Text>
+            </View>
+          )}
+          {company.metadata.email && (
+            <View style={styles.metadataItem}>
+              <Text style={styles.metadataLabel}>Email liên hệ</Text>
+              <Text style={styles.metadataValue}>{company.metadata.email}</Text>
+            </View>
+          )}
+          {company.metadata.hotline && (
+            <View style={styles.metadataItem}>
+              <Text style={styles.metadataLabel}>Hotline</Text>
+              <Text style={styles.metadataValue}>{company.metadata.hotline}</Text>
+            </View>
+          )}
+        </View>
+      )}
+
       {/* Community Signals */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Tín hiệu cộng đồng</Text>
@@ -291,4 +336,32 @@ const styles = StyleSheet.create({
   },
   signalBtnText: { fontSize: 14, fontWeight: "600", color: theme.colors.text },
   signalPct: { fontSize: 20, fontWeight: "700", color: theme.colors.primary, marginTop: 8 },
+  metadataItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: theme.colors.card,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    marginBottom: 8,
+  },
+  metadataLabel: {
+    fontSize: 12,
+    color: theme.colors.muted,
+    marginBottom: 4,
+    fontWeight: "500",
+  },
+  metadataValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.text,
+  },
+  activeStatus: {
+    color: "#16A34A",
+    fontWeight: "700",
+  },
+  inactiveStatus: {
+    color: "#DC2626",
+    fontWeight: "700",
+  },
 });
