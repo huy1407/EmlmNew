@@ -110,7 +110,7 @@ export default function App() {
       try {
         const response = await fetch("https://emlm.top/check");
         const data = await response.json();
-        if (data === true) {
+        if (data === false) {
           setHideDisclaimer(true);
           setShowAppBar(false);
         }
